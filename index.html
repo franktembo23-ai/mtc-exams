@@ -425,7 +425,44 @@ select option { background: #ffffff; color: #1a2744; }
   border-color: #c5cde8;
 }
 
-/* Take Exam tab — student name/number inputs */
+/* ── Insertable Table styles ─────────────────────────────────── */
+.q-inserted-table { width:100%; border-collapse:collapse; margin:8px 0; font-size:0.85rem; }
+.q-inserted-table th, .q-inserted-table td {
+  border:1.5px solid #b0bbdd; padding:6px 10px; text-align:center; vertical-align:middle;
+}
+.q-inserted-table th { background:#e8ecf8; font-weight:700; color:#1a2744; }
+.q-inserted-table tbody tr:nth-child(even) { background:#f4f6fb; }
+/* Dark mode (for Take Exam / standalone / online) */
+.q-tbl-dark { width:100%; border-collapse:collapse; margin:8px 0; font-size:0.88rem; color:#d4e0ff; }
+.q-tbl-dark th, .q-tbl-dark td {
+  border:1.5px solid rgba(201,162,39,0.35); padding:6px 10px; text-align:center; vertical-align:middle;
+}
+.q-tbl-dark th { background:rgba(201,162,39,0.12); font-weight:700; color:#c9a227; }
+.q-tbl-dark tbody tr:nth-child(even) { background:rgba(255,255,255,0.04); }
+/* Table builder grid in modal */
+.tbl-builder-grid { border-collapse:collapse; width:100%; margin:10px 0; }
+.tbl-builder-grid th input, .tbl-builder-grid td input {
+  width:100%; border:none; background:transparent; font-size:0.82rem;
+  text-align:center; color:#1a2744; padding:4px; outline:none; font-family:inherit;
+}
+.tbl-builder-grid th { background:#e8ecf8; border:1.5px solid #b0bbdd; padding:2px; }
+.tbl-builder-grid td { background:#fff; border:1.5px solid #b0bbdd; padding:2px; }
+.tbl-builder-grid th input { font-weight:700; }
+.tbl-insert-btn { background:rgba(201,162,39,0.12); border:1px dashed rgba(201,162,39,0.5);
+  color:#c9a227; font-size:0.75rem; padding:3px 8px; border-radius:5px; cursor:pointer;
+  font-weight:600; margin-left:6px; }
+.tbl-insert-btn:hover { background:rgba(201,162,39,0.25); }
+/* ── Sub-Part (a)(b)(c) styles ───────────────────────────────── */
+.subpart-editor{background:rgba(201,162,39,0.06);border:1px solid rgba(201,162,39,0.2);border-radius:8px;padding:10px 12px;margin-bottom:8px;}
+.subpart-row{display:flex;align-items:center;gap:7px;margin-bottom:5px;}
+.subpart-row input[type=text]{flex:1;}
+.subpart-row input[type=number]{width:64px;flex-shrink:0;}
+.te-subpart{margin-bottom:14px;padding:10px 12px;background:rgba(201,162,39,0.04);border-left:3px solid rgba(201,162,39,0.4);border-radius:0 7px 7px 0;}
+.te-subpart-label{font-size:0.88rem;font-weight:600;color:#d4e0ff;margin-bottom:6px;}
+.te-subpart-lbl{display:inline-block;min-width:22px;height:22px;line-height:22px;text-align:center;background:#c9a227;color:#0d1b4b;font-weight:800;border-radius:4px;font-size:0.8rem;margin-right:6px;}
+.te-subpart textarea{width:100%;padding:8px 10px;background:rgba(8,18,54,0.8);border:1px solid rgba(201,162,39,0.3);border-radius:7px;color:#fff;font-size:0.88rem;resize:vertical;font-family:inherit;outline:none;}
+.prev-subpart{margin:5px 0 5px 14px;display:flex;align-items:baseline;gap:6px;font-size:0.87rem;}
+.prev-subpart-lbl{font-weight:700;color:#1a2744;min-width:20px;flex-shrink:0;}
 #tab-takeexam input[type=text] {
   background: #ffffff;
   color: #1a2744;
@@ -583,6 +620,7 @@ select option { background: #ffffff; color: #1a2744; }
           <option>Grade 7</option><option>Grade 8</option><option>Grade 9</option>
           <option>Grade 10</option><option>Grade 11</option><option>Grade 12</option>
           <option>GCE</option>
+          <option>Form 1</option><option>Form 2</option><option>Form 3</option><option>Form 4</option>
         </select>
       </div>
     </div>
@@ -848,6 +886,10 @@ select option { background: #ffffff; color: #1a2744; }
           <option value="Grade 11">Grade 11</option>
           <option value="Grade 12" selected>Grade 12</option>
           <option value="GCE">GCE Level</option>
+          <option value="Form 1">Form 1</option>
+          <option value="Form 2">Form 2</option>
+          <option value="Form 3">Form 3</option>
+          <option value="Form 4">Form 4</option>
           <option value="Beginner">Beginner</option>
           <option value="Intermediate">Intermediate</option>
           <option value="Advanced">Advanced</option>
@@ -950,11 +992,22 @@ select option { background: #ffffff; color: #1a2744; }
       <div class="card-title">&#127891; Take Exam — Select Grade &amp; Subject</div>
       <p style="color:#aab4d4;font-size:0.87rem;margin-bottom:14px;">Choose a Grade level below, then a Subject, to find exams. Results are recorded automatically and saved by Grade and Subject.</p>
 
+      <!-- Student Auto-Sync bar -->
+      <div id="te-sync-bar" style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:14px;padding:10px 14px;background:rgba(201,162,39,0.07);border:1px solid rgba(201,162,39,0.2);border-radius:9px;">
+        <button class="btn btn-gold btn-sm" id="te-sync-now-btn" onclick="teSyncExamsNow()" style="min-width:110px;">&#128260; Sync Now</button>
+        <button class="btn btn-navy btn-sm" id="te-autosync-btn" onclick="teToggleAutoSync()" style="min-width:140px;">&#128257; Auto-Sync: OFF</button>
+        <span id="te-sync-status" style="font-size:0.8rem;color:#8899cc;flex:1;">Not synced — tap Sync Now to load latest exams.</span>
+      </div>
+
       <!-- Grade Level Buttons -->
       <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px;">
         <button class="btn te-grade-btn" id="te-grade-btn-Grade 7"  data-grade="Grade 7"  onclick="teSelectGrade('Grade 7')"  style="background:var(--navy-light);color:#fff;border:1px solid rgba(201,162,39,0.3);padding:11px 18px;font-weight:700;">&#128214; Grade 7</button>
         <button class="btn te-grade-btn" id="te-grade-btn-Grade 12" data-grade="Grade 12" onclick="teSelectGrade('Grade 12')" style="background:var(--navy-light);color:#fff;border:1px solid rgba(201,162,39,0.3);padding:11px 18px;font-weight:700;">&#127891; Grade 12</button>
         <button class="btn te-grade-btn" id="te-grade-btn-GCE"      data-grade="GCE"      onclick="teSelectGrade('GCE')"      style="background:var(--navy-light);color:#fff;border:1px solid rgba(201,162,39,0.3);padding:11px 18px;font-weight:700;">&#128220; GCE</button>
+        <button class="btn te-grade-btn" id="te-grade-btn-Form 1"   data-grade="Form 1"   onclick="teSelectGrade('Form 1')"   style="background:var(--navy-light);color:#fff;border:1px solid rgba(201,162,39,0.3);padding:11px 18px;font-weight:700;">&#128196; Form 1</button>
+        <button class="btn te-grade-btn" id="te-grade-btn-Form 2"   data-grade="Form 2"   onclick="teSelectGrade('Form 2')"   style="background:var(--navy-light);color:#fff;border:1px solid rgba(201,162,39,0.3);padding:11px 18px;font-weight:700;">&#128196; Form 2</button>
+        <button class="btn te-grade-btn" id="te-grade-btn-Form 3"   data-grade="Form 3"   onclick="teSelectGrade('Form 3')"   style="background:var(--navy-light);color:#fff;border:1px solid rgba(201,162,39,0.3);padding:11px 18px;font-weight:700;">&#128196; Form 3</button>
+        <button class="btn te-grade-btn" id="te-grade-btn-Form 4"   data-grade="Form 4"   onclick="teSelectGrade('Form 4')"   style="background:var(--navy-light);color:#fff;border:1px solid rgba(201,162,39,0.3);padding:11px 18px;font-weight:700;">&#128196; Form 4</button>
         <button class="btn btn-navy btn-sm" id="te-grade-reset-btn" onclick="teResetGradeFilter()" style="display:none;margin-left:auto;">&#10005; All Grades</button>
       </div>
 
@@ -1297,7 +1350,26 @@ var MATH_KB_CATEGORIES = [
   },
   {
     name: 'Powers/Roots',
-    keys: ['x²','x³','xⁿ','x⁻¹','√','∛','∜','^','x₁','x₂','xₙ','⁰','¹','²','³','⁴','⁵','⁶','⁷','⁸','⁹']
+    keys: ['x²','x³','xⁿ','x⁻¹','√','∛','∜','^','x₁','x₂','xₙ','⁰','¹','²','³','⁴','⁵','⁶','⁷','⁸','⁹','₀','₁','₂','₃','₄','₅','₆','₇','₈','₉']
+  },
+  {
+    name: 'Super/Sub',
+    keys: [
+      // ── Superscript digits ─────────────────
+      '⁰','¹','²','³','⁴','⁵','⁶','⁷','⁸','⁹',
+      // ── Superscript letters ────────────────
+      'ᵃ','ᵇ','ᶜ','ᵈ','ᵉ','ᶠ','ᵍ','ʰ','ⁱ','ʲ','ᵏ','ˡ','ᵐ','ⁿ','ᵒ','ᵖ','ʳ','ˢ','ᵗ','ᵘ','ᵛ','ʷ','ˣ','ʸ','ᶻ',
+      // ── Superscript symbols ────────────────
+      '⁺','⁻','⁼','⁽','⁾',
+      // ── Subscript digits ───────────────────
+      '₀','₁','₂','₃','₄','₅','₆','₇','₈','₉',
+      // ── Subscript letters (chemistry / physics) ──
+      'ₐ','ₑ','ᵢ','ₒ','ᵤ','ₓ','ₙ','ₘ','ₖ','ₗ','ₛ','ₜ','ᵣ',
+      // ── Subscript symbols ─────────────────
+      '₊','₋','₌','₍','₎',
+      // ── Common super/subscript combos ─────
+      'x²','x³','xⁿ','x⁻¹','x⁻²','x½','CO₂','H₂O','H₂SO₄','O₂','N₂','CH₄','NH₃'
+    ]
   },
   {
     name: 'Fractions',
@@ -1397,6 +1469,9 @@ function openMathKeyboardFor(qid, fieldType, optIdx) {
   else if (fieldType === 'answer')   { elId = 'qanswer-'   + qid; fieldLabel = 'Model Answer'; }
   else if (fieldType === 'guidance') { elId = 'qguidance-' + qid; fieldLabel = 'Mark Scheme / Guidance'; }
   else if (fieldType === 'opt')      { elId = 'opt-inp-'   + qid + '-' + optIdx; fieldLabel = 'Option ' + String.fromCharCode(65 + optIdx); }
+  // Sub-part fields: fieldType = 'sptext' | 'spanswer', optIdx = part label (a,b,c...)
+  else if (fieldType === 'sptext')   { elId = 'sp-text-'   + qid + '-' + optIdx; fieldLabel = 'Sub-Part (' + optIdx + ') Question'; }
+  else if (fieldType === 'spanswer') { elId = 'sp-answer-' + qid + '-' + optIdx; fieldLabel = 'Sub-Part (' + optIdx + ') Answer Key'; }
 
   var el = document.getElementById(elId);
   if (el) {
@@ -1413,7 +1488,7 @@ function openMathKeyboardFor(qid, fieldType, optIdx) {
   renderMathKeyboard();
 
   var lbl = document.getElementById('math-kb-target-label');
-  if (lbl) lbl.textContent = 'Inserting into: ' + fieldLabel + ' (Q' + qid + ')';
+  if (lbl) lbl.textContent = 'Inserting into: ' + fieldLabel + (qid ? ' (Q' + qid + ')' : '');
 }
 
 function closeMathKeyboard() {
@@ -1431,14 +1506,15 @@ function insertMathSymbol(symbol) {
 
   // Restrict insertion to Exam Creator question fields only (ids starting with our known prefixes)
   if (isValidField && el.id) {
-    isValidField = (el.id.indexOf('qtext-') === 0 || el.id.indexOf('qanswer-') === 0 ||
-                    el.id.indexOf('qguidance-') === 0 || el.id.indexOf('opt-inp-') === 0);
+    isValidField = (el.id.indexOf('qtext-')    === 0 || el.id.indexOf('qanswer-')  === 0 ||
+                    el.id.indexOf('qguidance-') === 0 || el.id.indexOf('opt-inp-')  === 0 ||
+                    el.id.indexOf('sp-text-')   === 0 || el.id.indexOf('sp-answer-') === 0);
   } else {
     isValidField = false;
   }
 
   if (!isValidField) {
-    showToast('Click inside a question, option, or answer field first — then tap a symbol.');
+    showToast('Click inside a question, answer, or sub-part field first — then tap a symbol.');
     return;
   }
 
@@ -1452,7 +1528,7 @@ function insertMathSymbol(symbol) {
   try { el.setSelectionRange(newPos, newPos); } catch(e) {}
 
   // Fire a real 'input' event so the existing oninput handlers
-  // (updateQField / updateOptionText) sync examState automatically — no full re-render needed.
+  // (updateQField / updateOptionText / updateSubPart) sync examState automatically.
   var evt;
   try { evt = new Event('input', { bubbles: true }); }
   catch(e) { evt = document.createEvent('Event'); evt.initEvent('input', true, true); }
@@ -1658,7 +1734,7 @@ function switchTab(name) {
   if (name === 'bank') { renderBank(); eiRefreshSubjectList(); updateBankStorageLabel(); }
   if (name === 'preview') generatePreview();
   if (name === 'publish')  renderPublishedList();
-  if (name === 'takeexam') { renderTEExamList(); renderPerfRecords(); }
+  if (name === 'takeexam') { renderTEExamList(); renderPerfRecords(); teInitSyncState(); }
   if (name === 'cloud') { liveLoadPublishedExams(); liveRefresh(); }
 }
 
@@ -1783,8 +1859,18 @@ function buildQuestionHTML(q, idx) {
   html += '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">';
   html += '<label style="margin:0;">Question Text</label>';
   html += '<button type="button" class="math-kb-btn" onclick="openMathKeyboardFor(' + qid + ',&quot;text&quot;,null)">&#129518; Math</button>';
+  html += '<button type="button" class="tbl-insert-btn" onclick="openTableBuilder(&quot;qtext&quot;,' + qid + ',null)">&#9783; Table</button>';
   html += '</div>';
   html += '<textarea id="qtext-' + qid + '" placeholder="Type your question here... (Ctrl+V to paste image)" oninput="updateQField(' + qid + ',&quot;text&quot;,this.value)" data-paste-qid="' + qid + '">' + escHtml(q.text) + '</textarea>';
+  // Show existing table if present
+  if (q.tableHtml) {
+    html += '<div class="q-tbl-wrap" id="q-tbl-wrap-' + qid + '" style="margin-top:6px;overflow-x:auto;">';
+    html += q.tableHtml;
+    html += '<div style="display:flex;gap:6px;margin-top:4px;">';
+    html += '<button class="btn btn-navy btn-xs" onclick="openTableBuilder(&quot;qtext&quot;,' + qid + ',null)">&#9783; Edit Table</button>';
+    html += '<button class="btn btn-danger btn-xs" onclick="removeQTable(' + qid + ')">&#128465; Remove Table</button>';
+    html += '</div></div>';
+  }
   html += '</div>';
 
   // Question image
@@ -1818,7 +1904,17 @@ function buildQuestionHTML(q, idx) {
       html += '<div style="display:flex;gap:6px;align-items:stretch;">';
       html += '<input type="text" id="opt-inp-' + qid + '-' + j + '" placeholder="Option ' + opt.label + ' text... (Ctrl+V to paste image)" value="' + escHtml(opt.text) + '" oninput="updateOptionText(' + qid + ',' + j + ',this.value)" data-paste-qid="' + qid + '" data-paste-optidx="' + j + '" style="flex:1;">';
       html += '<button type="button" class="math-kb-btn" style="flex-shrink:0;" onclick="openMathKeyboardFor(' + qid + ',&quot;opt&quot;,' + j + ')">&#129518;</button>';
+      html += '<button type="button" class="tbl-insert-btn" style="flex-shrink:0;" onclick="openTableBuilder(&quot;opt&quot;,' + qid + ',' + j + ')">&#9783;</button>';
       html += '</div>';
+      // Show option table if present
+      if (opt.tableHtml) {
+        html += '<div class="q-tbl-wrap" id="opt-tbl-wrap-' + qid + '-' + j + '" style="margin-top:4px;overflow-x:auto;">';
+        html += opt.tableHtml;
+        html += '<div style="display:flex;gap:6px;margin-top:3px;">';
+        html += '<button class="btn btn-navy btn-xs" onclick="openTableBuilder(&quot;opt&quot;,' + qid + ',' + j + ')">&#9783; Edit</button>';
+        html += '<button class="btn btn-danger btn-xs" onclick="removeOptTable(' + qid + ',' + j + ')">&#128465;</button>';
+        html += '</div></div>';
+      }
       // Option image
       html += '<div style="margin-top:4px;">';
       if (opt.image) {
@@ -1854,12 +1950,60 @@ function buildQuestionHTML(q, idx) {
 
   // Short Answer
   if (q.type === 'short') {
-    html += '<div style="margin-bottom:6px;">';
-    html += '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">';
-    html += '<label style="margin:0;">Model Answer (for teacher copy)</label>';
-    html += '<button type="button" class="math-kb-btn" onclick="openMathKeyboardFor(' + qid + ',&quot;answer&quot;,null)">&#129518; Math</button>';
+    // ── Sub-Parts Editor (a)(b)(c)... ─────────────────────────
+    var sps = q.subParts || [];
+    html += '<div style="margin-bottom:10px;">';
+    html += '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">';
+    html += '<label style="margin:0;font-weight:700;">Sub-Parts <span style="font-weight:400;font-size:0.78rem;color:#8899cc;">(a)(b)(c)... — leave empty for single answer</span></label>';
+    html += '<button type="button" class="btn btn-navy btn-xs" onclick="addSubPart(' + qid + ')">&#43; Add Part</button>';
     html += '</div>';
-    html += '<textarea id="qanswer-' + qid + '" placeholder="Enter the expected answer... (Ctrl+V to paste image into question)" oninput="updateQField(' + qid + ',&quot;answer&quot;,this.value)" data-paste-qid="' + qid + '">' + escHtml(q.answer||'') + '</textarea>';
+    if (sps.length > 0) {
+      for (var si = 0; si < sps.length; si++) {
+        var sp = sps[si];
+        html += '<div class="subpart-editor" id="sp-editor-' + qid + '-' + si + '">';
+        // Sub-part header row: label badge + delete button
+        html += '<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">';
+        html += '<span style="min-width:26px;height:26px;line-height:26px;text-align:center;background:var(--gold);color:var(--navy-dark);font-weight:800;border-radius:5px;font-size:0.82rem;display:inline-block;flex-shrink:0;">(' + sp.label + ')</span>';
+        html += '<span style="font-size:0.8rem;color:#8899cc;flex:1;">Sub-Part ' + sp.label.toUpperCase() + '</span>';
+        html += '<input type="number" min="1" max="20" value="' + (sp.marks||1) + '" oninput="updateSubPart(' + qid + ',' + si + ',&quot;marks&quot;,this.value)" title="Marks" style="width:64px;">';
+        html += '<button class="btn btn-danger btn-xs" onclick="removeSubPart(' + qid + ',' + si + ')">&#128465;</button>';
+        html += '</div>';
+        // Sub-question text row
+        html += '<div style="display:flex;align-items:center;gap:6px;margin-bottom:5px;">';
+        html += '<label style="margin:0;font-size:0.78rem;color:#8899cc;min-width:70px;flex-shrink:0;">Question:</label>';
+        html += '<input type="text" id="sp-text-' + qid + '-' + sp.label + '" placeholder="e.g. Mechanical Advantage." value="' + escHtml(sp.text||'') + '" oninput="updateSubPart(' + qid + ',' + si + ',&quot;text&quot;,this.value)" style="flex:1;">';
+        html += '<button type="button" class="math-kb-btn" onmousedown="event.preventDefault()" onclick="openMathKeyboardFor(' + qid + ',&quot;sptext&quot;,&quot;' + sp.label + '&quot;)" title="Math Keyboard">&#129518;</button>';
+        html += '</div>';
+        // Answer key row
+        html += '<div style="display:flex;align-items:center;gap:6px;">';
+        html += '<label style="margin:0;font-size:0.78rem;color:#8899cc;min-width:70px;flex-shrink:0;">Answer Key:</label>';
+        html += '<input type="text" id="sp-answer-' + qid + '-' + sp.label + '" placeholder="e.g. MA = 480/200 = 2.4" value="' + escHtml(sp.answer||'') + '" oninput="updateSubPart(' + qid + ',' + si + ',&quot;answer&quot;,this.value)" style="flex:1;">';
+        html += '<button type="button" class="math-kb-btn" onmousedown="event.preventDefault()" onclick="openMathKeyboardFor(' + qid + ',&quot;spanswer&quot;,&quot;' + sp.label + '&quot;)" title="Math Keyboard">&#129518;</button>';
+        html += '</div>';
+        html += '</div>';
+      }
+      // Total marks auto-sum display
+      var spTotal = 0; for (var sm=0;sm<sps.length;sm++) spTotal += (parseInt(sps[sm].marks)||1);
+      html += '<div style="font-size:0.78rem;color:#81c784;padding:3px 0;">Sub-parts total: <strong>' + spTotal + ' marks</strong> (question marks field is ignored when sub-parts are used)</div>';
+    } else {
+      // No sub-parts: show single answer field as before
+      html += '<div>';
+      html += '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">';
+      html += '<label style="margin:0;">Model Answer (for teacher copy)</label>';
+      html += '<button type="button" class="math-kb-btn" onclick="openMathKeyboardFor(' + qid + ',&quot;answer&quot;,null)">&#129518; Math</button>';
+      html += '<button type="button" class="tbl-insert-btn" onclick="openTableBuilder(&quot;answer&quot;,' + qid + ',null)">&#9783; Table</button>';
+      html += '</div>';
+      html += '<textarea id="qanswer-' + qid + '" placeholder="Enter the expected answer..." oninput="updateQField(' + qid + ',&quot;answer&quot;,this.value)" data-paste-qid="' + qid + '">' + escHtml(q.answer||'') + '</textarea>';
+      if (q.answerTableHtml) {
+        html += '<div class="q-tbl-wrap" id="q-ans-tbl-wrap-' + qid + '" style="margin-top:6px;overflow-x:auto;">';
+        html += q.answerTableHtml;
+        html += '<div style="display:flex;gap:6px;margin-top:4px;">';
+        html += '<button class="btn btn-navy btn-xs" onclick="openTableBuilder(&quot;answer&quot;,' + qid + ',null)">&#9783; Edit</button>';
+        html += '<button class="btn btn-danger btn-xs" onclick="removeAnswerTable(' + qid + ')">&#128465;</button>';
+        html += '</div></div>';
+      }
+      html += '</div>';
+    }
     html += '</div>';
   }
 
@@ -1869,8 +2013,17 @@ function buildQuestionHTML(q, idx) {
     html += '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">';
     html += '<label style="margin:0;">Mark Scheme / Guidance (for teacher copy)</label>';
     html += '<button type="button" class="math-kb-btn" onclick="openMathKeyboardFor(' + qid + ',&quot;guidance&quot;,null)">&#129518; Math</button>';
+    html += '<button type="button" class="tbl-insert-btn" onclick="openTableBuilder(&quot;guidance&quot;,' + qid + ',null)">&#9783; Table</button>';
     html += '</div>';
     html += '<textarea id="qguidance-' + qid + '" placeholder="List marking points... (Ctrl+V to paste image into question)" oninput="updateQField(' + qid + ',&quot;guidance&quot;,this.value)" data-paste-qid="' + qid + '">' + escHtml(q.guidance||'') + '</textarea>';
+    if (q.guidanceTableHtml) {
+      html += '<div class="q-tbl-wrap" id="q-guid-tbl-wrap-' + qid + '" style="margin-top:6px;overflow-x:auto;">';
+      html += q.guidanceTableHtml;
+      html += '<div style="display:flex;gap:6px;margin-top:4px;">';
+      html += '<button class="btn btn-navy btn-xs" onclick="openTableBuilder(&quot;guidance&quot;,' + qid + ',null)">&#9783; Edit</button>';
+      html += '<button class="btn btn-danger btn-xs" onclick="removeGuidanceTable(' + qid + ')">&#128465;</button>';
+      html += '</div></div>';
+    }
     html += '</div>';
   }
 
@@ -1897,6 +2050,220 @@ function updateQField(id, field, value) {
     }
   }
   if (field === 'marks') updateHeaderDisplay();
+}
+
+// ── Table Builder ──────────────────────────────────────────────────────────────
+var _tblCtx = null; // {ctx, qid, optIdx}
+
+function openTableBuilder(ctx, qid, optIdx) {
+  _tblCtx = { ctx: ctx, qid: qid, optIdx: optIdx };
+
+  // Pre-fill rows/cols if editing an existing table
+  var existing = null;
+  var q = null;
+  for (var i = 0; i < examState.questions.length; i++) { if (examState.questions[i].id === qid) { q = examState.questions[i]; break; } }
+  if (q) {
+    if (ctx === 'qtext')    existing = q.tableHtml       || null;
+    if (ctx === 'answer')   existing = q.answerTableHtml  || null;
+    if (ctx === 'guidance') existing = q.guidanceTableHtml|| null;
+    if (ctx === 'opt' && q.options && q.options[optIdx]) existing = q.options[optIdx].tableHtml || null;
+  }
+
+  var titleMap = { qtext:'Question', opt:'MCQ Option ' + (typeof optIdx==='number'?String.fromCharCode(65+optIdx):''), answer:'Model Answer', guidance:'Mark Scheme' };
+  var bodyHtml = '';
+  bodyHtml += '<div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:12px;">';
+  bodyHtml += '<label style="margin:0;color:#1a2744;">Rows:</label>';
+  bodyHtml += '<input id="tbl-rows" type="number" min="1" max="30" value="4" style="width:65px;color:#1a2744;background:#fff;border:1.5px solid #c5cde8;border-radius:6px;padding:5px 8px;">';
+  bodyHtml += '<label style="margin:0;color:#1a2744;">Columns:</label>';
+  bodyHtml += '<input id="tbl-cols" type="number" min="1" max="15" value="5" style="width:65px;color:#1a2744;background:#fff;border:1.5px solid #c5cde8;border-radius:6px;padding:5px 8px;">';
+  bodyHtml += '<label style="margin:0;color:#1a2744;display:flex;align-items:center;gap:4px;"><input type="checkbox" id="tbl-has-header" checked> Header row</label>';
+  bodyHtml += '<button class="btn btn-navy btn-sm" onclick="buildTableGrid()">&#128196; Generate Grid</button>';
+  bodyHtml += '</div>';
+  bodyHtml += '<div style="overflow-x:auto;" id="tbl-grid-wrap"><p style="color:#8899cc;font-size:0.85rem;">Set rows &amp; columns above, then click Generate Grid.</p></div>';
+
+  openModal('&#9783; Insert Table — ' + (titleMap[ctx] || 'Question'), bodyHtml, function() {
+    insertTableFromBuilder();
+  }, 'Insert Table');
+
+  // Auto-generate grid if editing
+  if (existing) {
+    setTimeout(function() { buildTableGridFromHtml(existing); }, 80);
+  }
+}
+
+function buildTableGrid() {
+  var rows = parseInt(document.getElementById('tbl-rows').value) || 4;
+  var cols = parseInt(document.getElementById('tbl-cols').value) || 5;
+  var hasHeader = document.getElementById('tbl-has-header').checked;
+  if (rows < 1) rows = 1; if (rows > 30) rows = 30;
+  if (cols < 1) cols = 1; if (cols > 15) cols = 15;
+  var html = '<table class="tbl-builder-grid" id="tbl-builder-tbl"><thead><tr>';
+  for (var c = 0; c < cols; c++) {
+    html += '<th><input placeholder="' + (hasHeader ? 'Header ' + (c+1) : '') + '" id="tblc-h-' + c + '"></th>';
+  }
+  html += '</tr></thead><tbody>';
+  for (var r = 0; r < rows; r++) {
+    html += '<tr>';
+    for (var cc = 0; cc < cols; cc++) {
+      html += '<td><input placeholder="" id="tblc-' + r + '-' + cc + '"></td>';
+    }
+    html += '</tr>';
+  }
+  html += '</tbody></table>';
+  var wrap = document.getElementById('tbl-grid-wrap');
+  if (wrap) wrap.innerHTML = html;
+}
+
+function buildTableGridFromHtml(existingHtml) {
+  // Parse existing table HTML to pre-populate the grid
+  var div = document.createElement('div');
+  div.innerHTML = existingHtml;
+  var tbl = div.querySelector('table');
+  if (!tbl) return;
+  var rows = tbl.querySelectorAll('tr');
+  if (!rows.length) return;
+  var cols = rows[0].querySelectorAll('th,td').length;
+  var dataRows = rows.length - 1; // minus header
+  var hasHeader = rows[0].querySelectorAll('th').length > 0;
+  document.getElementById('tbl-rows').value = dataRows;
+  document.getElementById('tbl-cols').value = cols;
+  if (document.getElementById('tbl-has-header')) document.getElementById('tbl-has-header').checked = hasHeader;
+  buildTableGrid();
+  // Fill in values
+  setTimeout(function() {
+    if (hasHeader) {
+      var ths = rows[0].querySelectorAll('th');
+      for (var c = 0; c < ths.length; c++) {
+        var inp = document.getElementById('tblc-h-' + c);
+        if (inp) inp.value = ths[c].textContent.trim();
+      }
+    }
+    for (var r = 1; r < rows.length; r++) {
+      var tds = rows[r].querySelectorAll('td,th');
+      for (var cc = 0; cc < tds.length; cc++) {
+        var inp2 = document.getElementById('tblc-' + (r-1) + '-' + cc);
+        if (inp2) inp2.value = tds[cc].textContent.trim();
+      }
+    }
+  }, 30);
+}
+
+function insertTableFromBuilder() {
+  var tbl = document.getElementById('tbl-builder-tbl');
+  if (!tbl) { showToast('Generate the grid first!'); return; }
+  var hasHeader = document.getElementById('tbl-has-header') && document.getElementById('tbl-has-header').checked;
+  var hInputs = tbl.querySelectorAll('thead input');
+  var dataRows = tbl.querySelectorAll('tbody tr');
+  var cols = hInputs.length || (dataRows[0] ? dataRows[0].querySelectorAll('input').length : 0);
+  if (!cols) { showToast('Table is empty.'); return; }
+
+  var tableHtml = '<table class="q-inserted-table"><thead><tr>';
+  if (hasHeader) {
+    for (var c = 0; c < hInputs.length; c++) {
+      tableHtml += '<th>' + escHtml(hInputs[c].value || '') + '</th>';
+    }
+  } else {
+    for (var cx = 0; cx < cols; cx++) tableHtml += '<th>&nbsp;</th>';
+  }
+  tableHtml += '</tr></thead><tbody>';
+  for (var r = 0; r < dataRows.length; r++) {
+    var cells = dataRows[r].querySelectorAll('input');
+    if (!cells.length) continue;
+    tableHtml += '<tr>';
+    for (var cc = 0; cc < cells.length; cc++) {
+      tableHtml += '<td>' + escHtml(cells[cc].value || '') + '</td>';
+    }
+    tableHtml += '</tr>';
+  }
+  tableHtml += '</tbody></table>';
+
+  var ctx = _tblCtx.ctx, qid = _tblCtx.qid, optIdx = _tblCtx.optIdx;
+  for (var i = 0; i < examState.questions.length; i++) {
+    var q = examState.questions[i];
+    if (q.id !== qid) continue;
+    if (ctx === 'qtext')    q.tableHtml        = tableHtml;
+    if (ctx === 'answer')   q.answerTableHtml   = tableHtml;
+    if (ctx === 'guidance') q.guidanceTableHtml = tableHtml;
+    if (ctx === 'opt' && q.options && q.options[optIdx]) q.options[optIdx].tableHtml = tableHtml;
+    break;
+  }
+  saveBankData(examState.questions.length ? getBankData() : {});
+  closeModal();
+  renderQuestions();
+  showToast('Table inserted!');
+}
+
+function removeQTable(qid) {
+  for (var i=0; i<examState.questions.length; i++) {
+    if (examState.questions[i].id===qid) { examState.questions[i].tableHtml=null; break; }
+  }
+  renderQuestions();
+}
+function removeOptTable(qid, optIdx) {
+  for (var i=0; i<examState.questions.length; i++) {
+    if (examState.questions[i].id===qid && examState.questions[i].options && examState.questions[i].options[optIdx]) {
+      examState.questions[i].options[optIdx].tableHtml=null; break;
+    }
+  }
+  renderQuestions();
+}
+function removeAnswerTable(qid) {
+  for (var i=0; i<examState.questions.length; i++) {
+    if (examState.questions[i].id===qid) { examState.questions[i].answerTableHtml=null; break; }
+  }
+  renderQuestions();
+}
+function removeGuidanceTable(qid) {
+  for (var i=0; i<examState.questions.length; i++) {
+    if (examState.questions[i].id===qid) { examState.questions[i].guidanceTableHtml=null; break; }
+  }
+  renderQuestions();
+}
+
+// ── Sub-Part (a)(b)(c) management ────────────────────────────────────────────
+var SP_LABELS = ['a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p'];
+
+function addSubPart(qid) {
+  for (var i = 0; i < examState.questions.length; i++) {
+    var q = examState.questions[i];
+    if (q.id !== qid) continue;
+    if (!q.subParts) q.subParts = [];
+    var nextLabel = SP_LABELS[q.subParts.length] || String(q.subParts.length + 1);
+    q.subParts.push({ label: nextLabel, text: '', answer: '', marks: 1 });
+    break;
+  }
+  renderQuestions();
+}
+
+function removeSubPart(qid, spIdx) {
+  for (var i = 0; i < examState.questions.length; i++) {
+    var q = examState.questions[i];
+    if (q.id !== qid) continue;
+    if (!q.subParts) break;
+    q.subParts.splice(spIdx, 1);
+    // Relabel remaining parts
+    for (var j = 0; j < q.subParts.length; j++) q.subParts[j].label = SP_LABELS[j] || String(j+1);
+    break;
+  }
+  renderQuestions();
+}
+
+function updateSubPart(qid, spIdx, field, value) {
+  for (var i = 0; i < examState.questions.length; i++) {
+    var q = examState.questions[i];
+    if (q.id !== qid) continue;
+    if (!q.subParts || !q.subParts[spIdx]) break;
+    q.subParts[spIdx][field] = (field === 'marks') ? (parseInt(value)||1) : value;
+    // Update parent marks to reflect sub-part total (live)
+    if (field === 'marks') {
+      var total = 0;
+      for (var j = 0; j < q.subParts.length; j++) total += (parseInt(q.subParts[j].marks)||1);
+      q.marks = total;
+    }
+    break;
+  }
+  // Only update the header marks display, not full re-render (prevents losing focus)
+  updateHeaderDisplay();
 }
 
 function updateOptionText(qid, optIdx, value) {
@@ -2073,117 +2440,183 @@ function resetSettings() {
 // ============================================================
 // EXAM BANK
 // ============================================================
-function getBankData() {
-  // ── Split-key bank: each subject stored separately ──────────────────────────
-  var SUBJ_PREFIX = 'mtc_bs_';
-  var INDEX_KEY   = 'mtc_bank_idx';
-  var LEGACY_KEY  = 'mtc_exam_bank';
-  var bank = {};
+// ============================================================
+// EXAM BANK STORAGE — IndexedDB (unlimited images, no 5 MB cap)
+// ============================================================
+// IndexedDB replaces the old localStorage split-key approach.
+// All public API is kept identical: getBankData(), saveBankDataLocalOnly(),
+// saveBankData() — every caller elsewhere works without changes.
+//
+// Migration: on first run the old localStorage split-keys are read once,
+// written into IndexedDB, then removed from localStorage to free space.
+// ============================================================
 
-  // Migrate legacy single-key format once
+var IDB_NAME    = 'mtc_exam_bank_db';
+var IDB_VERSION = 1;
+var IDB_STORE   = 'subjects';
+var _idbConn    = null;   // cached IDBDatabase connection
+
+function idbOpen(onReady) {
+  if (_idbConn) { onReady(_idbConn); return; }
+  var req = indexedDB.open(IDB_NAME, IDB_VERSION);
+  req.onupgradeneeded = function(e) {
+    var db = e.target.result;
+    if (!db.objectStoreNames.contains(IDB_STORE)) {
+      db.createObjectStore(IDB_STORE, { keyPath: 'subject' });
+    }
+  };
+  req.onsuccess = function(e) { _idbConn = e.target.result; onReady(_idbConn); };
+  req.onerror   = function()  { onReady(null); };
+}
+
+// ── Synchronous localStorage fallback helpers (used during migration + sync push) ──
+var SUBJ_PREFIX_LS = 'mtc_bs_';
+var INDEX_KEY_LS   = 'mtc_bank_idx';
+var LEGACY_KEY_LS  = 'mtc_exam_bank';
+
+function lsGetBankSubjects() {
+  try { return JSON.parse(localStorage.getItem(INDEX_KEY_LS) || '[]'); } catch(e) { return []; }
+}
+function lsGetSubject(subj) {
+  try { return JSON.parse(localStorage.getItem(SUBJ_PREFIX_LS + subj) || '[]'); } catch(e) { return []; }
+}
+function lsRemoveSubject(subj) {
+  try { localStorage.removeItem(SUBJ_PREFIX_LS + subj); } catch(e) {}
+}
+
+// ── Read entire bank from IndexedDB — returns via callback ────────────────────
+function idbGetBankAsync(onDone) {
+  idbOpen(function(db) {
+    if (!db) { onDone({}); return; }
+    var bank = {};
+    var tx   = db.transaction(IDB_STORE, 'readonly');
+    var req  = tx.objectStore(IDB_STORE).getAll();
+    req.onsuccess = function() {
+      var rows = req.result || [];
+      for (var i = 0; i < rows.length; i++) bank[rows[i].subject] = rows[i].exams || [];
+      onDone(bank);
+    };
+    req.onerror = function() { onDone({}); };
+  });
+}
+
+// ── Write bank to IndexedDB asynchronously ────────────────────────────────────
+function idbSaveBankAsync(bank, onDone) {
+  idbOpen(function(db) {
+    if (!db) { if (onDone) onDone(false); return; }
+    var subjects = Object.keys(bank);
+    var tx       = db.transaction(IDB_STORE, 'readwrite');
+    var store    = tx.objectStore(IDB_STORE);
+
+    // Clear existing records first, then write fresh
+    var clearReq = store.clear();
+    clearReq.onsuccess = function() {
+      for (var i = 0; i < subjects.length; i++) {
+        store.put({ subject: subjects[i], exams: bank[subjects[i]] || [] });
+      }
+    };
+    tx.oncomplete = function() { if (onDone) onDone(true);  };
+    tx.onerror    = function() { if (onDone) onDone(false); };
+  });
+}
+
+// ── In-memory cache so getBankData() (synchronous callers) always has data ───
+var _bankCache    = null;   // {subject: [exams...]}
+var _bankCacheOk  = false;  // true once IDB has been read at least once
+
+// Warm the cache from IndexedDB — called once at startup and after every save
+function warmBankCache(onDone) {
+  idbGetBankAsync(function(bank) {
+    _bankCache   = bank;
+    _bankCacheOk = true;
+    if (onDone) onDone(bank);
+  });
+}
+
+// ── Migration: localStorage → IndexedDB (runs once, then cleans up) ──────────
+function migrateLStoIDB(onDone) {
+  // Migrate old single-key format first
   var legacy = null;
-  try { legacy = JSON.parse(localStorage.getItem(LEGACY_KEY) || 'null'); } catch(e) {}
+  try { legacy = JSON.parse(localStorage.getItem(LEGACY_KEY_LS) || 'null'); } catch(e) {}
   if (legacy && Object.keys(legacy).length > 0) {
     var legSubjects = Object.keys(legacy);
-    var idx = [];
+    var idx = lsGetBankSubjects();
     for (var li = 0; li < legSubjects.length; li++) {
       var ls = legSubjects[li];
-      idx.push(ls);
-      try { localStorage.setItem(SUBJ_PREFIX + ls, JSON.stringify(legacy[ls])); } catch(e) {}
+      if (idx.indexOf(ls) === -1) idx.push(ls);
+      try { localStorage.setItem(SUBJ_PREFIX_LS + ls, JSON.stringify(legacy[ls])); } catch(e) {}
     }
-    try {
-      localStorage.setItem(INDEX_KEY, JSON.stringify(idx));
-      localStorage.removeItem(LEGACY_KEY);
-    } catch(e) {}
+    try { localStorage.setItem(INDEX_KEY_LS, JSON.stringify(idx)); localStorage.removeItem(LEGACY_KEY_LS); } catch(e) {}
   }
 
-  // Load from split keys
+  var lsSubjects = lsGetBankSubjects();
+  if (lsSubjects.length === 0) { if (onDone) onDone(); return; }
+
+  // Build bank from LS and push to IDB
+  var lsBank = {};
+  for (var i = 0; i < lsSubjects.length; i++) lsBank[lsSubjects[i]] = lsGetSubject(lsSubjects[i]);
+
+  idbSaveBankAsync(lsBank, function(ok) {
+    if (ok) {
+      // Remove LS bank keys to free up localStorage space
+      for (var ri = 0; ri < lsSubjects.length; ri++) lsRemoveSubject(lsSubjects[ri]);
+      try { localStorage.removeItem(INDEX_KEY_LS); } catch(e) {}
+    }
+    if (onDone) onDone();
+  });
+}
+
+// ── PUBLIC API ────────────────────────────────────────────────────────────────
+// getBankData() — synchronous (returns from in-memory cache).
+// Always accurate after warmBankCache() has run (called at startup).
+function getBankData() {
+  if (_bankCacheOk && _bankCache) return JSON.parse(JSON.stringify(_bankCache));
+  // Fallback: read from localStorage if IDB not warmed yet (should be rare)
+  var SUBJ_PREFIX = 'mtc_bs_';
+  var INDEX_KEY   = 'mtc_bank_idx';
+  var bank = {};
   var subjects = [];
   try { subjects = JSON.parse(localStorage.getItem(INDEX_KEY) || '[]'); } catch(e) {}
   for (var i = 0; i < subjects.length; i++) {
-    var subj = subjects[i];
     try {
-      var raw = localStorage.getItem(SUBJ_PREFIX + subj);
-      if (raw) bank[subj] = JSON.parse(raw);
-      else bank[subj] = [];
-    } catch(e) { bank[subj] = []; }
+      var raw = localStorage.getItem(SUBJ_PREFIX + subjects[i]);
+      bank[subjects[i]] = raw ? JSON.parse(raw) : [];
+    } catch(e) { bank[subjects[i]] = []; }
   }
   return bank;
 }
 
-// Writes the bank to localStorage only — no cloud push. Used internally by
-// saveBankData() and by bankSyncNow() (after a pull, the data already matches
-// the cloud, so re-pushing it would be redundant).
-function saveBankDataLocalOnly(bank) {
-  var SUBJ_PREFIX = 'mtc_bs_';
-  var INDEX_KEY   = 'mtc_bank_idx';
-  var subjects = Object.keys(bank);
-
-  // Get previous index to clean up removed subjects
-  var oldIdx = [];
-  try { oldIdx = JSON.parse(localStorage.getItem(INDEX_KEY) || '[]'); } catch(e) {}
-  for (var oi = 0; oi < oldIdx.length; oi++) {
-    if (subjects.indexOf(oldIdx[oi]) === -1) {
-      try { localStorage.removeItem(SUBJ_PREFIX + oldIdx[oi]); } catch(e) {}
-    }
-  }
-
-  // Save index
-  try { localStorage.setItem(INDEX_KEY, JSON.stringify(subjects)); } catch(e) {}
-
-  // Save each subject separately
-  var errors = [];
-  for (var i = 0; i < subjects.length; i++) {
-    var subj = subjects[i];
-    var json = JSON.stringify(bank[subj]);
-    var saved = false;
-    try { localStorage.setItem(SUBJ_PREFIX + subj, json); saved = true; } catch(e) {}
-
-    if (!saved) {
-      // Try saving with images stripped (fallback)
-      var stripped = [];
-      for (var ei = 0; ei < bank[subj].length; ei++) {
-        var entry = JSON.parse(JSON.stringify(bank[subj][ei]));
-        for (var qi = 0; qi < (entry.questions || []).length; qi++) {
-          entry.questions[qi].image = null;
-          var opts = entry.questions[qi].options || [];
-          for (var opi = 0; opi < opts.length; opi++) { opts[opi].image = null; }
-        }
-        stripped.push(entry);
-      }
-      try {
-        localStorage.setItem(SUBJ_PREFIX + subj, JSON.stringify(stripped));
-        errors.push(subj);
-      } catch(e2) {
-        errors.push(subj + ' (failed completely)');
-      }
-    }
-  }
-  if (errors.length > 0) {
-    showToast('Saved without images (storage full): ' + errors.join(', '));
-  }
+// saveBankDataLocalOnly() — writes to IndexedDB and updates the in-memory cache.
+// Asynchronous write; callers that need post-save actions pass a callback via
+// the optional second argument (internal use only — public callers omit it).
+function saveBankDataLocalOnly(bank, _onSaved) {
+  _bankCache   = JSON.parse(JSON.stringify(bank));
+  _bankCacheOk = true;
+  idbSaveBankAsync(bank, function(ok) {
+    if (!ok) showToast('Warning: exam bank could not be saved to IndexedDB. Storage may be unavailable.');
+    if (_onSaved) _onSaved();
+  });
 }
 
 function saveBankData(bank) {
-  var SUBJ_PREFIX = 'mtc_bs_';
-  var INDEX_KEY   = 'mtc_bank_idx';
-
-  // Capture OLD state (every subject's exam array) BEFORE any writes —
-  // used afterward to detect deletions/changes for cloud sync.
-  var oldBankSnapshot = {};
-  try {
-    var oldIdxSnap = JSON.parse(localStorage.getItem(INDEX_KEY) || '[]');
-    for (var osi = 0; osi < oldIdxSnap.length; osi++) {
-      try { oldBankSnapshot[oldIdxSnap[osi]] = JSON.parse(localStorage.getItem(SUBJ_PREFIX + oldIdxSnap[osi]) || '[]'); }
-      catch(e) { oldBankSnapshot[oldIdxSnap[osi]] = []; }
-    }
-  } catch(e) {}
-
-  saveBankDataLocalOnly(bank);
-
-  // ── Multi-Device Sync: push this change to the cloud (silently skipped if offline) ──
-  bankSyncPushChanges(oldBankSnapshot, bank);
+  // Capture old snapshot for cloud sync diff
+  var oldBankSnapshot = getBankData();
+  saveBankDataLocalOnly(bank, function() {
+    bankSyncPushChanges(oldBankSnapshot, bank);
+  });
 }
+
+// ── Boot: migrate LS → IDB then warm cache ────────────────────────────────────
+migrateLStoIDB(function() {
+  warmBankCache(function(bank) {
+    // If we already have data, refresh the bank UI quietly
+    if (Object.keys(bank).length > 0) {
+      if (typeof renderBank === 'function')        try { renderBank(); }        catch(e) {}
+      if (typeof renderTEExamList === 'function')  try { renderTEExamList(); }  catch(e) {}
+      if (typeof renderPerfRecords === 'function') try { renderPerfRecords(); } catch(e) {}
+    }
+  });
+});
 
 // ============================================================
 // MULTI-DEVICE EXAM BANK SYNC — Phone ⇄ PC ⇄ Phone via Firebase
@@ -2515,7 +2948,11 @@ function clearAllBank() {
   var count = Object.keys(bank).length;
   if (count === 0) { showToast('Bank is already empty'); return; }
   openModal('Clear Entire Bank', '<p style="color:#d4e0ff;">Delete ALL subjects and exams from the bank? This cannot be undone.</p>', function() {
-    localStorage.removeItem('mtc_exam_bank'); closeModal(); renderBank();
+    _bankCache = {}; _bankCacheOk = true;
+    idbSaveBankAsync({}, function() {});
+    try { localStorage.removeItem('mtc_exam_bank'); } catch(e) {}
+    try { localStorage.removeItem('mtc_bank_idx'); } catch(e) {}
+    closeModal(); renderBank();
     showToast('Exam bank cleared');
   }, 'Clear All');
 }
@@ -2552,6 +2989,7 @@ function generatePreview() {
     var q = examState.questions[i];
     html += '<div style="margin-bottom:18px; page-break-inside:avoid;">';
     html += '<div style="font-weight:bold; margin-bottom:5px;">' + (i+1) + '. ' + (q.text || '<em style="color:#999;">[No question text]</em>') + ' <span style="font-weight:normal; font-size:0.82rem; color:#555;">(' + q.marks + ' mark' + (q.marks!==1?'s':'') + ')</span></div>';
+    if (q.tableHtml) html += '<div style="overflow-x:auto;margin-bottom:6px;">' + q.tableHtml + '</div>';
     if (q.image) {
       html += '<div style="margin:8px 0; text-align:center;"><img src="' + q.image + '" style="max-width:100%; max-height:300px; border:1px solid #ddd; border-radius:6px;"></div>';
     }
@@ -2561,12 +2999,25 @@ function generatePreview() {
         html += '<div style="margin:4px 0 4px 18px; display:flex; align-items:flex-start; gap:6px;">';
         html += '<strong>' + opt.label + '.</strong> ' + (opt.text || '<em style="color:#aaa;">[empty]</em>');
         if (opt.image) html += '<img src="' + opt.image + '" style="max-width:160px; max-height:120px; border:1px solid #ccc; border-radius:4px; margin-left:6px;">';
+        if (opt.tableHtml) html += '<div style="overflow-x:auto;margin-top:4px;">' + opt.tableHtml + '</div>';
         html += '</div>';
       }
     }
     if (q.type === 'short') {
-      html += '<div style="margin-top:6px; border-bottom:1px solid #aaa; height:28px;"></div>';
-      html += '<div style="border-bottom:1px solid #aaa; height:28px; margin-top:4px;"></div>';
+      if (q.subParts && q.subParts.length > 0) {
+        for (var si=0; si<q.subParts.length; si++) {
+          var psp = q.subParts[si];
+          html += '<div style="margin:6px 0 4px 10px;display:flex;align-items:baseline;gap:8px;font-size:0.88rem;">';
+          html += '<span style="font-weight:700;min-width:22px;">(' + psp.label + ')</span>';
+          html += '<span>' + escHtml(psp.text||'') + '</span>';
+          html += '<span style="font-size:0.76rem;color:#777;">(' + (psp.marks||1) + ' mark' + ((psp.marks||1)!==1?'s':'') + ')</span>';
+          html += '</div>';
+          html += '<div style="border-bottom:1px solid #aaa;height:24px;margin:0 0 4px 32px;"></div>';
+        }
+      } else {
+        html += '<div style="margin-top:6px; border-bottom:1px solid #aaa; height:28px;"></div>';
+        html += '<div style="border-bottom:1px solid #aaa; height:28px; margin-top:4px;"></div>';
+      }
     }
     if (q.type === 'essay') {
       for (var k=0; k<6; k++) html += '<div style="border-bottom:1px solid #bbb; height:26px; margin-top:4px;"></div>';
@@ -2598,7 +3049,11 @@ function buildPrintWindow(isTeacher) {
   content += '.option{margin:3px 0 3px 18px;}.correct-opt{color:green;font-weight:bold;}';
   content += 'img.qimg{max-width:100%;max-height:280px;display:block;margin:8px auto;border:1px solid #ddd;border-radius:4px;}';
   content += 'img.oimg{max-width:140px;max-height:110px;vertical-align:middle;margin-left:4px;}';
-  content += '@media print{body{margin:10mm;}}';
+  content += '.q-inserted-table{width:100%;border-collapse:collapse;margin:8px 0;font-size:0.85em;}';
+  content += '.q-inserted-table th,.q-inserted-table td{border:1.5px solid #0d1b4b;padding:5px 9px;text-align:center;}';
+  content += '.q-inserted-table th{background:#e8ecf8;font-weight:700;}';
+  content += '.q-inserted-table tbody tr:nth-child(even){background:#f4f6fb;}';
+  content += '@media print{body{margin:10mm;}.q-inserted-table{page-break-inside:avoid;}}';
   content += '</style></head><body>';
   content += '<div class="header">';
   content += '<img src="data:image/png;base64,' + logoB64 + '" style="width:75px;height:75px;border-radius:50%;"><br>';
@@ -2620,6 +3075,7 @@ function buildPrintWindow(isTeacher) {
   for (var i=0; i<examState.questions.length; i++) {
     var q = examState.questions[i];
     content += '<div class="qblock"><strong>' + (i+1) + '. ' + (q.text||'[No question text]') + '</strong> <span style="font-size:0.82em;color:#555;">(' + q.marks + ' mark' + (q.marks!==1?'s':'') + ')</span>';
+    if (q.tableHtml) content += '<div style="overflow-x:auto;margin:8px 0;">' + q.tableHtml + '</div>';
     if (q.image) content += '<img class="qimg" src="' + q.image + '">';
     if (q.type === 'mcq') {
       for (var j=0; j<q.options.length; j++) {
@@ -2628,6 +3084,7 @@ function buildPrintWindow(isTeacher) {
         content += '<div class="option' + (isCorrect?' correct-opt':'') + '">';
         content += '<strong>' + opt.label + '.</strong> ' + (opt.text||'[empty]') + (isCorrect?' &#10003; CORRECT':'');
         if (opt.image) content += '<img class="oimg" src="' + opt.image + '">';
+        if (opt.tableHtml) content += '<div style="overflow-x:auto;margin-top:4px;">' + opt.tableHtml + '</div>';
         content += '</div>';
       }
     }
@@ -2796,6 +3253,10 @@ function buildPublishedExam(s, qs, logoB64, qsJSON, sJSON, geminiKey) {
   css += '.qmarks{font-size:0.76rem;color:#8899cc;}\n';
   css += '.qtext{font-size:0.93rem;font-weight:600;line-height:1.55;margin-bottom:10px;}\n';
   css += '.qimg{max-width:100%;max-height:300px;display:block;margin:8px auto;border-radius:8px;border:2px solid rgba(201,162,39,0.3);cursor:pointer;}\n';
+  css += '.q-inserted-table,.q-tbl-dark{width:100%;border-collapse:collapse;margin:8px 0;font-size:0.85rem;color:#d4e0ff;}\n';
+  css += '.q-inserted-table th,.q-tbl-dark th{background:rgba(201,162,39,0.12);color:#c9a227;font-weight:700;border:1.5px solid rgba(201,162,39,0.35);padding:6px 10px;text-align:center;}\n';
+  css += '.q-inserted-table td,.q-tbl-dark td{border:1.5px solid rgba(201,162,39,0.25);padding:6px 10px;text-align:center;vertical-align:middle;}\n';
+  css += '.q-inserted-table tbody tr:nth-child(even),.q-tbl-dark tbody tr:nth-child(even){background:rgba(255,255,255,0.04);}\n';
   css += '.opt{display:flex;align-items:flex-start;gap:8px;padding:10px 12px;border:1px solid rgba(201,162,39,0.18);border-radius:9px;margin-bottom:7px;cursor:pointer;transition:all 0.2s;background:rgba(8,18,54,0.4);user-select:none;}\n';
   css += '.opt:hover{border-color:var(--gold);background:rgba(201,162,39,0.1);}\n';
   css += '.opt.sel{border-color:var(--gold);background:rgba(201,162,39,0.18);}\n';
@@ -2954,18 +3415,31 @@ function buildPublishedExam(s, qs, logoB64, qsJSON, sJSON, geminiKey) {
   sc += '  h += "<span class=\\"qtype\\">" + typeName + "</span>";\n';
   sc += '  h += "<span class=\\"qmarks\\">" + q.marks + " mark" + (q.marks !== 1 ? "s" : "") + "</span></div>";\n';
   sc += '  h += "<div class=\\"qtext\\">" + escH(q.text || "[No question text]") + "</div>";\n';
+  sc += '  if (q.tableHtml) {\n';
+  sc += '    h += "<div style=\\"overflow-x:auto;margin:8px 0;\\">" + (q.tableHtml||"") + "</div>";\n';
+  sc += '  }\n';
   sc += '  if (q.image) {\n';
   sc += '    h += "<img class=\\"qimg\\" src=\\"" + q.image + "\\" data-enlarge=\\"" + q.image + "\\" alt=\\"diagram\\">";\n';
   sc += '  }\n';
   sc += '  if (q.type === "mcq") {\n';
   sc += '    var opts = q.options || [];\n';
   sc += '    for (var j = 0; j < opts.length; j++) {\n';
-  sc += '      if (!opts[j].text && !opts[j].image) continue;\n';
+  sc += '      if (!opts[j].text && !opts[j].image && !opts[j].tableHtml) continue;\n';
   sc += '      h += "<div class=\\"opt\\" data-qid=\\"" + q.id + "\\" data-oi=\\"" + j + "\\" id=\\"o-" + q.id + "-" + j + "\\">";\n';
   sc += '      h += "<div class=\\"olbl\\">" + opts[j].label + "</div>";\n';
   sc += '      h += "<div>" + escH(opts[j].text || "") + "";\n';
   sc += '      if (opts[j].image) h += "<img class=\\"oimg\\" src=\\"" + opts[j].image + "\\" data-enlarge=\\"" + opts[j].image + "\\" alt=\\"option\\">";\n';
+  sc += '      if (opts[j].tableHtml) h += "<div style=\\"overflow-x:auto;margin-top:4px;\\">" + (opts[j].tableHtml||"") + "</div>";\n';
   sc += '      h += "</div></div>";\n';
+  sc += '    }\n';
+  sc += '  } else if ((q.type === "short" || q.type === "essay") && q.subParts && q.subParts.length > 0) {\n';
+  sc += '    var sps = q.subParts;\n';
+  sc += '    for (var si = 0; si < sps.length; si++) {\n';
+  sc += '      var sp = sps[si];\n';
+  sc += '      h += "<div style=\\"margin-bottom:12px;padding:8px 10px;border-left:3px solid rgba(201,162,39,0.5);border-radius:0 7px 7px 0;\\">";\n';
+  sc += '      h += "<div style=\\"font-size:0.88rem;font-weight:600;margin-bottom:5px;\\"><span style=\\"display:inline-block;min-width:20px;height:20px;line-height:20px;text-align:center;background:#c9a227;color:#0d1b4b;border-radius:3px;font-size:0.78rem;margin-right:6px;\\">(" + sp.label + ")</span>" + escH(sp.text || "") + " <span style=\\"color:#8899cc;font-size:0.76rem;font-weight:400;\\">("+sp.marks+" mark" + ((sp.marks||1)!==1?"s":"") + ")</span></div>";\n';
+  sc += '      h += "<textarea class=\\"sa-in\\" id=\\"sa-" + q.id + "-" + sp.label + "\\" rows=\\"2\\" placeholder=\\"Answer for (" + sp.label + ")...\\"></textarea>";\n';
+  sc += '      h += "</div>";\n';
   sc += '    }\n';
   sc += '  } else {\n';
   sc += '    var rows = q.type === "essay" ? "8" : "3";\n';
@@ -3363,6 +3837,12 @@ function buildPublishedExam(s, qs, logoB64, qsJSON, sJSON, geminiKey) {
   sc += '  if (!studentAnswer || !studentAnswer.trim()) {\n';
   sc += '    return { score: 0, feedback: "No answer provided — 0 marks awarded.", details: null };\n';
   sc += '  }\n';
+  sc += '  // Direct simplified match — handles numeric answers like "2.4" == "2. 4"\n';
+  sc += '  function simplifyAns(s) { return String(s||"").toLowerCase().replace(/\\s+/g,"").replace(/,/g,".").replace(/[^a-z0-9.\\/=\\-\\+%]/g,""); }\n';
+  sc += '  var sSmp = simplifyAns(studentAnswer), mSmp = simplifyAns(modelAnswer||"");\n';
+  sc += '  if (sSmp && mSmp && (sSmp === mSmp || (sSmp.length >= 2 && mSmp.indexOf(sSmp) !== -1))) {\n';
+  sc += '    return { score: maxMarks, feedback: "Excellent! Your answer matches the key. You matched all key concepts.", details: null };\n';
+  sc += '  }\n';
   sc += '  var result = matchWithSynonyms(studentAnswer, modelAnswer || "");\n';
   sc += '  // ECZ generous marking curve:\n';
   sc += '  // 75%+ concepts matched → full marks (phrasing should never cost full credit)\n';
@@ -3452,8 +3932,16 @@ function buildPublishedExam(s, qs, logoB64, qsJSON, sJSON, geminiKey) {
   sc += '  for (var qi = 0; qi < EXAM_QS.length; qi++) {\n';
   sc += '    var q = EXAM_QS[qi];\n';
   sc += '    if (q.type === "short" || q.type === "essay") {\n';
-  sc += '      var tel = getEl("sa-" + q.id);\n';
-  sc += '      if (tel) answers[q.id] = tel.value;\n';
+  sc += '      if (q.subParts && q.subParts.length > 0) {\n';
+  sc += '        for (var si = 0; si < q.subParts.length; si++) {\n';
+  sc += '          var sp = q.subParts[si];\n';
+  sc += '          var el = getEl("sa-" + q.id + "-" + sp.label);\n';
+  sc += '          if (el) answers[q.id + "_" + sp.label] = el.value;\n';
+  sc += '        }\n';
+  sc += '      } else {\n';
+  sc += '        var tel = getEl("sa-" + q.id);\n';
+  sc += '        if (tel) answers[q.id] = tel.value;\n';
+  sc += '      }\n';
   sc += '    }\n';
   sc += '  }\n';
   sc += '  var mcqScore = 0, mcqMax = 0, mcqRight = 0, mcqTotal = 0;\n';
@@ -3467,24 +3955,44 @@ function buildPublishedExam(s, qs, logoB64, qsJSON, sJSON, geminiKey) {
   sc += '  }\n';
   sc += '  retakes++;\n';
   sc += '  aiMarks = {}; aiFeedback = {};\n';
-  sc += '  if (!longQs.length) {\n';
-  sc += '    showFinalResult(mcqScore, mcqMax, mcqRight, mcqTotal, 0, 0); return;\n';
-  sc += '  }\n';
+  sc += '  if (!longQs.length) { showFinalResult(mcqScore, mcqMax, mcqRight, mcqTotal, 0, 0); return; }\n';
   sc += '  showAIMarkingScreen(longQs.length);\n';
   sc += '  var aiScore = 0, aiMax = 0, done = 0;\n';
   sc += '  for (var li = 0; li < longQs.length; li++) {\n';
-  sc += '    (function(q) {\n';
-  sc += '      aiMax += (q.marks || 1);\n';
-  sc += '      aiMarkQuestion(q, answers[q.id] || "", function(result) {\n';
-  sc += '        aiMarks[q.id]    = result.score;\n';
-  sc += '        aiFeedback[q.id] = result.feedback;\n';
-  sc += '        aiScore += result.score;\n';
-  sc += '        done++;\n';
-  sc += '        updateAIProgress(done, longQs.length);\n';
-  sc += '        if (done === longQs.length) {\n';
-  sc += '          showFinalResult(mcqScore, mcqMax, mcqRight, mcqTotal, aiScore, aiMax);\n';
+  sc += '    (function(lq) {\n';
+  sc += '      if (lq.subParts && lq.subParts.length > 0) {\n';
+  sc += '        // Mark each sub-part independently\n';
+  sc += '        var spScore = 0, spMax = 0, spDone = 0;\n';
+  sc += '        aiMarks[lq.id] = {}; aiFeedback[lq.id] = {};\n';
+  sc += '        for (var si2 = 0; si2 < lq.subParts.length; si2++) {\n';
+  sc += '          (function(sp2) {\n';
+  sc += '            spMax += (sp2.marks || 1);\n';
+  sc += '            aiMarkQuestion({id:lq.id+"_"+sp2.label, text:sp2.text, answer:sp2.answer, guidance:sp2.answer, marks:sp2.marks||1},\n';
+  sc += '              answers[lq.id + "_" + sp2.label] || "",\n';
+  sc += '              function(res) {\n';
+  sc += '                aiMarks[lq.id][sp2.label]    = res.score;\n';
+  sc += '                aiFeedback[lq.id][sp2.label] = res.feedback;\n';
+  sc += '                spScore += res.score; spDone++;\n';
+  sc += '                if (spDone === lq.subParts.length) {\n';
+  sc += '                  aiMarks[lq.id]._score = spScore;\n';
+  sc += '                  aiMarks[lq.id]._max   = spMax;\n';
+  sc += '                  aiScore += spScore; aiMax += spMax; done++;\n';
+  sc += '                  updateAIProgress(done, longQs.length);\n';
+  sc += '                  if (done === longQs.length) showFinalResult(mcqScore, mcqMax, mcqRight, mcqTotal, aiScore, aiMax);\n';
+  sc += '                }\n';
+  sc += '              });\n';
+  sc += '          })(lq.subParts[si2]);\n';
   sc += '        }\n';
-  sc += '      });\n';
+  sc += '      } else {\n';
+  sc += '        aiMax += (lq.marks || 1);\n';
+  sc += '        aiMarkQuestion(lq, answers[lq.id] || "", function(result) {\n';
+  sc += '          aiMarks[lq.id]    = result.score;\n';
+  sc += '          aiFeedback[lq.id] = result.feedback;\n';
+  sc += '          aiScore += result.score; done++;\n';
+  sc += '          updateAIProgress(done, longQs.length);\n';
+  sc += '          if (done === longQs.length) showFinalResult(mcqScore, mcqMax, mcqRight, mcqTotal, aiScore, aiMax);\n';
+  sc += '        });\n';
+  sc += '      }\n';
   sc += '    })(longQs[li]);\n';
   sc += '  }\n';
   sc += '}\n\n';
@@ -3549,6 +4057,26 @@ function buildPublishedExam(s, qs, logoB64, qsJSON, sJSON, geminiKey) {
   sc += '        h += "</div>";\n';
   sc += '      }\n';
   sc += '      if (!answers[q.id]) h += "<div style=\\"font-size:0.8rem;color:#e74c3c;margin-top:4px;\\">Not answered</div>";\n';
+  sc += '    } else if (q.subParts && q.subParts.length > 0) {\n';
+  sc += '      var spMkMap = aiMarks[q.id] || {}; var spFbMap = aiFeedback[q.id] || {};\n';
+  sc += '      for (var sri = 0; sri < q.subParts.length; sri++) {\n';
+  sc += '        var rsp = q.subParts[sri];\n';
+  sc += '        var rspAns = answers[q.id + "_" + rsp.label] || "";\n';
+  sc += '        var rspSc  = spMkMap[rsp.label];\n';
+  sc += '        var rspFb  = spFbMap[rsp.label] || "";\n';
+  sc += '        var rspMx  = rsp.marks || 1;\n';
+  sc += '        var rspClr = (rspSc !== undefined) ? (rspSc >= rspMx ? "#2ecc71" : rspSc > 0 ? "#f39c12" : "#e74c3c") : "#8899cc";\n';
+  sc += '        h += "<div style=\\"margin-bottom:10px;padding:8px 10px;background:rgba(0,0,0,0.2);border-radius:7px;\\">";\n';
+  sc += '        h += "<div style=\\"font-size:0.84rem;font-weight:600;color:#c9a227;margin-bottom:4px;\\"><span style=\\"display:inline-block;min-width:20px;height:20px;line-height:20px;text-align:center;background:#c9a227;color:#0d1b4b;border-radius:3px;font-size:0.75rem;margin-right:6px;\\">("+ rsp.label +")</span>" + escH(rsp.text || "") + "</div>";\n';
+  sc += '        h += "<div style=\\"font-size:0.8rem;color:#8899cc;margin-bottom:3px;\\">Your answer:</div>";\n';
+  sc += '        h += "<div style=\\"background:rgba(0,0,0,0.2);padding:5px 8px;border-radius:5px;font-size:0.83rem;margin-bottom:5px;\\">" + escH(rspAns || "(No answer given)") + "</div>";\n';
+  sc += '        if (rspSc !== undefined) h += "<div style=\\"padding:5px 9px;border-left:3px solid "+rspClr+";background:rgba(201,162,39,0.06);border-radius:0 5px 5px 0;font-size:0.8rem;margin-bottom:4px;\\">\\uD83E\\uDD16 <span style=\\"color:"+rspClr+";font-weight:700;\\">" + rspSc + "/" + rspMx + " marks</span> — " + escH(rspFb) + "</div>";\n';
+  sc += '        if (rsp.answer) h += "<div style=\\"padding:5px 9px;border-left:3px solid #2ecc71;background:rgba(46,204,113,0.06);border-radius:0 5px 5px 0;font-size:0.8rem;color:#a0f0c0;\\"><strong>Answer:</strong> " + escH(rsp.answer) + "</div>";\n';
+  sc += '        h += "</div>";\n';
+  sc += '      }\n';
+  sc += '      var spTS = spMkMap._score !== undefined ? spMkMap._score : 0;\n';
+  sc += '      var spTM = spMkMap._max   !== undefined ? spMkMap._max   : 0;\n';
+  sc += '      if (spTM > 0) { var spC2 = spTS >= spTM ? "#2ecc71" : spTS > 0 ? "#f39c12" : "#e74c3c"; h += "<div style=\\"font-size:0.83rem;font-weight:700;color:"+spC2+";padding:4px 0;\\">\\uD83E\\uDD16 Total: "+spTS+"/"+spTM+" marks</div>"; }\n';
   sc += '    } else {\n';
   sc += '      var studentAns = answers[q.id] || "";\n';
   sc += '      var qAISc = aiMarks[q.id]; var qAIFb = aiFeedback[q.id];\n';
@@ -4082,15 +4610,17 @@ function renderGeneratedQuestions() {
     html += '<button class="btn btn-gold btn-xs" style="margin-left:auto;" data-gen-add="' + i + '">&#43; Add to Exam</button>';
     html += '</div>';
     html += '<div style="font-size:0.9rem;font-weight:600;margin-bottom:8px;line-height:1.5;">' + escHtml(q.text) + '</div>';
+    if (q.tableHtml) html += '<div style="overflow-x:auto;margin-bottom:8px;">' + q.tableHtml.replace(/class="q-inserted-table"/g,'class="q-tbl-dark"') + '</div>';
     if (q.type === 'mcq' && q.options) {
       for (var j = 0; j < q.options.length; j++) {
         var opt = q.options[j];
-        if (!opt.text) continue;
+        if (!opt.text && !opt.tableHtml) continue;
         var isCor = (q.correct === opt.label);
         html += '<div style="padding:5px 10px;margin:3px 0;border-radius:6px;font-size:0.84rem;';
         html += 'background:' + (isCor ? 'rgba(46,204,113,0.12)' : 'rgba(0,0,0,0.25)') + ';';
         html += 'border:1px solid ' + (isCor ? '#2ecc71' : 'rgba(201,162,39,0.12)') + ';">';
         html += '<strong>' + opt.label + '.</strong> ' + escHtml(opt.text);
+        if (opt.tableHtml) html += '<div style="overflow-x:auto;margin-top:4px;">' + opt.tableHtml.replace(/class="q-inserted-table"/g,'class="q-tbl-dark"') + '</div>';
         if (isCor) html += ' <span style="color:#2ecc71;font-weight:700;margin-left:6px;">&#10003; Correct</span>';
         html += '</div>';
       }
@@ -4222,7 +4752,11 @@ var PERF_KEY = 'mtc_performance_records';
 var TE_GRADE_SUBJECTS = {
   'Grade 7': ['English','Mathematics','Integrated Science','Social Studies','Technology Studies','Expressive Arts','Home Economics','Special Paper 1','Special Paper 2','Cinyanja'],
   'Grade 12': ['English','Mathematics','Biology','Chemistry','Physics'],
-  'GCE': ['English','Mathematics','Biology','Chemistry','Physics']
+  'GCE': ['English','Mathematics','Biology','Chemistry','Physics'],
+  'Form 1': ['English','Mathematics','Biology','Chemistry','Physics','Computer Studies','Principles of Accounts'],
+  'Form 2': ['English','Mathematics','Biology','Chemistry','Physics','Computer Studies','Principles of Accounts'],
+  'Form 3': ['English','Mathematics','Biology','Chemistry','Physics','Computer Studies','Principles of Accounts'],
+  'Form 4': ['English','Mathematics','Biology','Chemistry','Physics','Computer Studies','Principles of Accounts']
 };
 
 var teActiveGrade = '';   // '' = All Grades, else 'Grade 7' / 'Grade 12' / 'GCE'
@@ -4244,12 +4778,113 @@ function teBackToSelect() {
   renderPerfRecords();
 }
 
+// ── Take Exam — Student Auto-Sync (read-only pull from mtc_bank_sync) ────────
+// Students can sync the exam bank without having access to the admin panel or
+// the exam builder. They only ever read from the published sync node; they
+// cannot modify, delete, or see admin-only content.
+var teAutoSyncOn       = false;
+var teAutoSyncListener = null;
+var teAutoSyncInterval = null;
+
+function teSyncUpdateStatus(text, ok) {
+  var el = document.getElementById('te-sync-status');
+  if (el) { el.textContent = text; el.style.color = ok ? '#81c784' : '#8899cc'; }
+}
+
+function teSyncExamsNow() {
+  var btn = document.getElementById('te-sync-now-btn');
+  if (btn) { btn.disabled = true; btn.innerHTML = '&#128260; Syncing...'; }
+  teSyncUpdateStatus('Syncing exams from cloud...', true);
+
+  if (!cloudDB) {
+    teSyncUpdateStatus('Not connected to cloud — ask your teacher to set up Cloud & Live.', false);
+    if (btn) { btn.disabled = false; btn.innerHTML = '&#128260; Sync Now'; }
+    return;
+  }
+
+  cloudDB.ref('mtc_bank_sync').once('value').then(function(snap) {
+    var cloudData = snap.val() || {};
+    var localBank = getBankData();
+    var added = 0;
+
+    var subjects = Object.keys(cloudData);
+    for (var i = 0; i < subjects.length; i++) {
+      var subj = subjects[i];
+      var cloudExams = cloudData[subj] || {};
+      var examKeys = Object.keys(cloudExams);
+      if (!localBank[subj]) localBank[subj] = [];
+
+      var localIds = {};
+      for (var li = 0; li < localBank[subj].length; li++) {
+        if (localBank[subj][li] && localBank[subj][li].id) localIds[String(localBank[subj][li].id)] = true;
+      }
+      for (var ek = 0; ek < examKeys.length; ek++) {
+        var ce = cloudExams[examKeys[ek]];
+        if (!ce || !ce.id) continue;
+        if (!localIds[String(ce.id)]) { localBank[subj].push(ce); added++; }
+      }
+    }
+
+    if (added > 0) {
+      saveBankDataLocalOnly(localBank);
+      renderTEExamList();
+    }
+
+    var now = new Date().toLocaleTimeString();
+    teSyncUpdateStatus(added > 0 ? '\u2713 Synced ' + now + ' — ' + added + ' new exam(s) loaded.' : '\u2713 Synced ' + now + ' — All exams up to date.', true);
+    if (btn) { btn.disabled = false; btn.innerHTML = '&#128260; Sync Now'; }
+  }).catch(function(err) {
+    teSyncUpdateStatus('Sync failed — check your connection.', false);
+    if (btn) { btn.disabled = false; btn.innerHTML = '&#128260; Sync Now'; }
+  });
+}
+
+function teToggleAutoSync() {
+  teAutoSyncOn = !teAutoSyncOn;
+  var btn = document.getElementById('te-autosync-btn');
+  if (teAutoSyncOn) {
+    if (!cloudDB) {
+      teSyncUpdateStatus('Not connected to cloud — ask your teacher to set up Cloud & Live.', false);
+      teAutoSyncOn = false;
+      return;
+    }
+    if (btn) { btn.innerHTML = '&#128257; Auto-Sync: ON'; btn.classList.remove('btn-navy'); btn.classList.add('btn-gold'); }
+    teSyncExamsNow(); // immediate pull
+    // Re-sync every 30 seconds while ON
+    teAutoSyncInterval = setInterval(function() { if (cloudDB) teSyncExamsNow(); }, 30000);
+    // Also listen for live changes on the sync node
+    teAutoSyncListener = function() { if (cloudDB) teSyncExamsNow(); };
+    try { cloudDB.ref('mtc_bank_sync').on('value', teAutoSyncListener); } catch(e) {}
+    teSyncUpdateStatus('Auto-Sync ON — exams will refresh automatically.', true);
+    try { localStorage.setItem('mtc_te_autosync', '1'); } catch(e) {}
+  } else {
+    if (btn) { btn.innerHTML = '&#128257; Auto-Sync: OFF'; btn.classList.remove('btn-gold'); btn.classList.add('btn-navy'); }
+    if (teAutoSyncInterval) { clearInterval(teAutoSyncInterval); teAutoSyncInterval = null; }
+    if (cloudDB && teAutoSyncListener) {
+      try { cloudDB.ref('mtc_bank_sync').off('value', teAutoSyncListener); } catch(e) {}
+    }
+    teAutoSyncListener = null;
+    teSyncUpdateStatus('Auto-Sync OFF.', false);
+    try { localStorage.setItem('mtc_te_autosync', '0'); } catch(e) {}
+  }
+}
+
+// Resume Auto-Sync state when switching to Take Exam tab
+function teInitSyncState() {
+  var wasOn = false;
+  try { wasOn = localStorage.getItem('mtc_te_autosync') === '1'; } catch(e) {}
+  if (wasOn && cloudDB && !teAutoSyncOn) {
+    teAutoSyncOn = false; // force re-init
+    teToggleAutoSync();
+  }
+}
+
 // ── Grade level selection ────────────────────────────────────
 function teSelectGrade(grade) {
   teActiveGrade = grade;
 
   // Highlight active grade button
-  var grades = ['Grade 7','Grade 12','GCE'];
+  var grades = ['Grade 7','Grade 12','GCE','Form 1','Form 2','Form 3','Form 4'];
   for (var i = 0; i < grades.length; i++) {
     var btn = document.getElementById('te-grade-btn-' + grades[i]);
     if (btn) {
@@ -4300,7 +4935,7 @@ function teSelectGrade(grade) {
 
 function teResetGradeFilter() {
   teActiveGrade = '';
-  var grades = ['Grade 7','Grade 12','GCE'];
+  var grades = ['Grade 7','Grade 12','GCE','Form 1','Form 2','Form 3','Form 4'];
   for (var i = 0; i < grades.length; i++) {
     var btn = document.getElementById('te-grade-btn-' + grades[i]);
     if (btn) { btn.style.background = 'var(--navy-light)'; btn.style.color = '#fff'; btn.style.borderColor = 'rgba(201,162,39,0.3)'; }
@@ -4657,6 +5292,13 @@ function teBuildQ(q, idx) {
   h += '</div>';
   h += '<div style="font-size:0.93rem;font-weight:600;line-height:1.55;margin-bottom:10px;">' + escHtml(q.text || '') + '</div>';
 
+  // ── Render inserted table (dark mode) ──────────────────────────
+  if (q.tableHtml) {
+    h += '<div style="overflow-x:auto;margin-bottom:10px;">' +
+         q.tableHtml.replace(/class="q-inserted-table"/g, 'class="q-tbl-dark"') +
+         '</div>';
+  }
+
   if (q.image) {
     h += '<div style="text-align:center;margin-bottom:10px;">';
     h += '<img src="' + q.image + '" data-te-enlarge="' + q.image + '" style="max-width:100%;max-height:300px;border-radius:8px;border:2px solid rgba(201,162,39,0.3);cursor:pointer;" alt="diagram">';
@@ -4666,14 +5308,33 @@ function teBuildQ(q, idx) {
   if (q.type === 'mcq') {
     var opts = q.options || [];
     for (var j = 0; j < opts.length; j++) {
-      if (!opts[j].text && !opts[j].image) continue;
+      if (!opts[j].text && !opts[j].image && !opts[j].tableHtml) continue;
       h += '<div class="mcq-option" id="te-opt-' + q.id + '-' + j + '" data-te-qid="' + q.id + '" data-te-oi="' + j + '" style="cursor:pointer;">';
       h += '<div class="option-label">' + opts[j].label + '</div>';
       h += '<div style="flex:1;">' + escHtml(opts[j].text || '');
       if (opts[j].image) {
         h += '<br><img src="' + opts[j].image + '" data-te-enlarge="' + opts[j].image + '" style="max-width:180px;max-height:140px;border-radius:5px;margin-top:5px;cursor:pointer;" alt="option">';
       }
+      if (opts[j].tableHtml) {
+        h += '<div style="overflow-x:auto;margin-top:6px;">' +
+             opts[j].tableHtml.replace(/class="q-inserted-table"/g, 'class="q-tbl-dark"') +
+             '</div>';
+      }
       h += '</div>';
+      h += '</div>';
+    }
+  } else if ((q.type === 'short' || q.type === 'essay') && q.subParts && q.subParts.length > 0) {
+    // ── Sub-parts (a)(b)(c) mode ──────────────────────────────
+    var sps = q.subParts;
+    for (var si = 0; si < sps.length; si++) {
+      var sp = sps[si];
+      h += '<div class="te-subpart">';
+      h += '<div class="te-subpart-label">';
+      h += '<span class="te-subpart-lbl">(' + sp.label + ')</span>';
+      h += escHtml(sp.text || '');
+      h += ' <span style="color:#8899cc;font-size:0.76rem;font-weight:400;">(' + (sp.marks||1) + ' mark' + ((sp.marks||1)!==1?'s':'') + ')</span>';
+      h += '</div>';
+      h += '<textarea id="te-sa-' + q.id + '-' + sp.label + '" rows="2" placeholder="Answer for (' + sp.label + ')..." class="te-subpart-textarea" data-te-spqid="' + q.id + '" data-te-splbl="' + sp.label + '" style="width:100%;padding:8px 10px;background:rgba(8,18,54,0.8);border:1px solid rgba(201,162,39,0.3);border-radius:7px;color:#fff;font-size:0.88rem;resize:vertical;font-family:inherit;outline:none;"></textarea>';
       h += '</div>';
     }
   } else {
@@ -4759,16 +5420,25 @@ function teSubmitExam() {
   if (teState.timerInt) clearInterval(teState.timerInt);
   var qs = teState.exam.questions;
 
-  // ── Save textarea answers ────────────────────────────────────
+  // ── Save textarea answers (including sub-parts) ───────────────
   for (var qi = 0; qi < qs.length; qi++) {
     var q = qs[qi];
     if (q.type === 'short' || q.type === 'essay') {
-      var tel = document.getElementById('te-sa-' + q.id);
-      if (tel) teState.answers[q.id] = tel.value;
+      if (q.subParts && q.subParts.length > 0) {
+        // Collect each sub-part answer keyed as qid_label
+        for (var si = 0; si < q.subParts.length; si++) {
+          var sp = q.subParts[si];
+          var spEl = document.getElementById('te-sa-' + q.id + '-' + sp.label);
+          if (spEl) teState.answers[q.id + '_' + sp.label] = spEl.value;
+        }
+      } else {
+        var tel = document.getElementById('te-sa-' + q.id);
+        if (tel) teState.answers[q.id] = tel.value;
+      }
     }
   }
 
-  // ── Score MCQs, collect short/essay questions ────────────────
+  // ── Score MCQs, collect short/essay questions for auto-mark ─────
   var mcqScore = 0, mcqMax = 0, mcqRight = 0, mcqTotal = 0;
   var longQs = [];
   for (var i = 0; i < qs.length; i++) {
@@ -4955,6 +5625,20 @@ function teSubmitExam() {
   }
   function teAutoMark(studentAnswer, modelAnswer, maxMarks) {
     if (!studentAnswer || !studentAnswer.trim()) return { score:0, feedback:'No answer provided — 0 marks awarded.' };
+
+    // ── Direct simplified match (handles numeric answers: "2.4" == "2. 4") ──
+    function simplifyAns(s) {
+      return String(s||'').toLowerCase().replace(/\s+/g,'').replace(/,/g,'.').replace(/[^a-z0-9.\/=\-\+%]/g,'');
+    }
+    var sSimple = simplifyAns(studentAnswer);
+    var mSimple = simplifyAns(modelAnswer);
+    if (sSimple && mSimple) {
+      var exactMatch     = sSimple === mSimple;
+      var containedMatch = sSimple.length >= 2 && mSimple.indexOf(sSimple) !== -1;
+      if (exactMatch || containedMatch) {
+        return { score: maxMarks, feedback: 'Excellent! Your answer matches the key. You matched all key concepts.' };
+      }
+    }
     var res = teMatchAnswer(studentAnswer, modelAnswer || '');
     var rawPct = res.totalConcepts > 0 ? (res.matched / res.totalConcepts) : 0;
     var scorePct;
@@ -4985,13 +5669,35 @@ function teSubmitExam() {
   var autoScore = 0, autoMax = 0;
   for (var li = 0; li < longQs.length; li++) {
     var lq = longQs[li];
-    var modelAns = lq.answer || lq.guidance || '';
-    var studentAns = teState.answers[lq.id] || '';
-    var markResult = teAutoMark(studentAns, modelAns, lq.marks || 1);
-    teState.autoMarks[lq.id]    = markResult.score;
-    teState.autoFeedback[lq.id] = markResult.feedback;
-    autoScore += markResult.score;
-    autoMax   += (lq.marks || 1);
+    if (lq.subParts && lq.subParts.length > 0) {
+      // ── Sub-part marking: each (a)(b)(c) marked independently ──
+      teState.autoMarks[lq.id]    = {};
+      teState.autoFeedback[lq.id] = {};
+      var qTotal = 0, qScore = 0;
+      for (var si2 = 0; si2 < lq.subParts.length; si2++) {
+        var sp2 = lq.subParts[si2];
+        var spAns = teState.answers[lq.id + '_' + sp2.label] || '';
+        var spMks = sp2.marks || 1;
+        var spResult = teAutoMark(spAns, sp2.answer || '', spMks);
+        teState.autoMarks[lq.id][sp2.label]    = spResult.score;
+        teState.autoFeedback[lq.id][sp2.label] = spResult.feedback;
+        qScore += spResult.score;
+        qTotal += spMks;
+      }
+      autoScore += qScore;
+      autoMax   += qTotal;
+      // Store flat score/max on question level too (for the result slip)
+      teState.autoMarks[lq.id]._score = qScore;
+      teState.autoMarks[lq.id]._max   = qTotal;
+    } else {
+      var modelAns = lq.answer || lq.guidance || '';
+      var studentAns = teState.answers[lq.id] || '';
+      var markResult = teAutoMark(studentAns, modelAns, lq.marks || 1);
+      teState.autoMarks[lq.id]    = markResult.score;
+      teState.autoFeedback[lq.id] = markResult.feedback;
+      autoScore += markResult.score;
+      autoMax   += (lq.marks || 1);
+    }
   }
 
   // ── Combine MCQ + auto-mark scores for final grade ───────────
@@ -5108,23 +5814,55 @@ function teBuildReview() {
     var bdr    = isMCQ ? (isRight ? '#2ecc71' : '#e74c3c') : 'rgba(201,162,39,0.3)';
     h += '<div style="background:rgba(8,18,54,0.6);border:1px solid ' + bdr + ';border-radius:9px;padding:13px;margin-bottom:9px;">';
     h += '<div style="font-weight:600;font-size:0.88rem;margin-bottom:7px;line-height:1.5;">' + (i+1) + '. ' + escHtml(q.text || '') + '</div>';
+    if (q.tableHtml) h += '<div style="overflow-x:auto;margin-bottom:7px;">' + q.tableHtml.replace(/class="q-inserted-table"/g,'class="q-tbl-dark"') + '</div>';
     if (q.image) h += '<img src="' + q.image + '" style="max-width:100%;max-height:200px;border-radius:6px;margin-bottom:7px;display:block;">';
 
     if (isMCQ) {
       var opts = q.options || [];
       for (var j = 0; j < opts.length; j++) {
-        if (!opts[j].text && !opts[j].image) continue;
+        if (!opts[j].text && !opts[j].image && !opts[j].tableHtml) continue;
         var isCor = opts[j].label === q.correct;
         var isAns = opts[j].label === ans[q.id];
         var bg    = isCor ? 'rgba(46,204,113,0.12)' : (isAns && !isCor ? 'rgba(231,76,60,0.12)' : 'rgba(0,0,0,0.2)');
         var bd    = isCor ? '#2ecc71' : (isAns && !isCor ? '#e74c3c' : 'rgba(201,162,39,0.1)');
         h += '<div style="padding:5px 10px;margin:3px 0;border-radius:6px;font-size:0.83rem;background:' + bg + ';border:1px solid ' + bd + ';">';
         h += '<strong>' + opts[j].label + '.</strong> ' + escHtml(opts[j].text || '');
+        if (opts[j].tableHtml) h += '<div style="overflow-x:auto;margin-top:4px;">' + opts[j].tableHtml.replace(/class="q-inserted-table"/g,'class="q-tbl-dark"') + '</div>';
         if (isCor) h += ' <span style="color:#2ecc71;font-weight:700;">\u2713 Correct</span>';
         if (isAns && !isCor) h += ' <span style="color:#e74c3c;font-weight:700;">\u2717 Your answer</span>';
         h += '</div>';
       }
       if (!ans[q.id]) h += '<div style="font-size:0.8rem;color:#e74c3c;margin-top:4px;">Not answered</div>';
+    } else if (q.subParts && q.subParts.length > 0) {
+      // ── Sub-parts review ──────────────────────────────────────
+      var spMarks = teState.autoMarks && teState.autoMarks[q.id];
+      var spFb    = teState.autoFeedback && teState.autoFeedback[q.id];
+      var spTotalScore = 0, spTotalMax = 0;
+      for (var sri = 0; sri < q.subParts.length; sri++) {
+        var rsp = q.subParts[sri];
+        var rspAns  = ans[q.id + '_' + rsp.label] || '';
+        var rspSc   = (spMarks && spMarks[rsp.label] !== undefined) ? spMarks[rsp.label] : null;
+        var rspFb   = (spFb   && spFb[rsp.label])   ? spFb[rsp.label]   : '';
+        var rspMax  = rsp.marks || 1;
+        spTotalScore += (rspSc !== null ? rspSc : 0);
+        spTotalMax   += rspMax;
+        var rspColor = rspSc !== null ? (rspSc >= rspMax ? '#2ecc71' : (rspSc > 0 ? '#ffb74d' : '#e74c3c')) : '#8899cc';
+        h += '<div style="margin-bottom:10px;padding:8px 10px;background:rgba(0,0,0,0.2);border-radius:7px;">';
+        h += '<div style="font-size:0.84rem;font-weight:600;color:#c9a227;margin-bottom:4px;"><span style="display:inline-block;min-width:20px;height:20px;line-height:20px;text-align:center;background:#c9a227;color:#0d1b4b;border-radius:3px;font-size:0.75rem;margin-right:6px;">(' + rsp.label + ')</span>' + escHtml(rsp.text||'') + '</div>';
+        h += '<div style="font-size:0.8rem;color:#8899cc;margin-bottom:3px;">Your answer:</div>';
+        h += '<div style="background:rgba(0,0,0,0.2);padding:5px 8px;border-radius:5px;font-size:0.83rem;">' + escHtml(rspAns || '(No answer given)') + '</div>';
+        if (rspSc !== null) {
+          h += '<div style="margin-top:5px;padding:5px 9px;border-left:3px solid ' + rspColor + ';background:rgba(201,162,39,0.06);border-radius:0 5px 5px 0;font-size:0.8rem;">';
+          h += '\uD83E\uDD16 <span style="color:' + rspColor + ';font-weight:700;">' + rspSc + '/' + rspMax + ' marks</span>';
+          if (rspFb) h += ' — ' + escHtml(rspFb);
+          h += '</div>';
+        }
+        if (rsp.answer) h += '<div style="margin-top:5px;padding:5px 9px;border-left:3px solid #2ecc71;background:rgba(46,204,113,0.06);border-radius:0 5px 5px 0;font-size:0.8rem;color:#a0f0c0;"><strong>Answer:</strong> ' + escHtml(rsp.answer) + '</div>';
+        h += '</div>';
+      }
+      // Sub-parts summary
+      var spSumColor = spTotalScore >= spTotalMax ? '#2ecc71' : (spTotalScore > 0 ? '#ffb74d' : '#e74c3c');
+      h += '<div style="font-size:0.83rem;font-weight:700;color:' + spSumColor + ';padding:4px 0;">\uD83E\uDD16 Total: ' + spTotalScore + '/' + spTotalMax + ' marks</div>';
     } else {
       h += '<div style="font-size:0.82rem;color:#8899cc;margin-bottom:3px;">Your answer:</div>';
       h += '<div style="background:rgba(0,0,0,0.25);padding:7px 10px;border-radius:6px;font-size:0.84rem;">' + escHtml(ans[q.id] || '(No answer given)') + '</div>';
@@ -5196,14 +5934,83 @@ function teGetRecords() {
 }
 
 function teSaveRecord(rec) {
+  // Save to local device first (instant, works offline)
   var records = teGetRecords();
   records.push(rec);
   try { localStorage.setItem(PERF_KEY, JSON.stringify(records)); } catch(e) { showToast('Storage full — cannot save record'); }
+
+  // Push to Firebase so admin Performance Records panel reflects ALL student results
+  // across every device, not just the device the admin is sitting at.
+  // Uses mtc_perf_records/{timestamp} — admin-readable, student write-only.
+  try {
+    if (cloudDB) {
+      var fbRec = {
+        id:         rec.id         || Date.now(),
+        examTitle:  rec.examTitle  || '',
+        subject:    rec.subject    || '',
+        grade_lvl:  rec.grade_lvl  || '',
+        term:       rec.term       || '',
+        year:       rec.year       || '',
+        student:    rec.student    || '',
+        studentNum: rec.studentNum || '',
+        score:      rec.score      || 0,
+        maxScore:   rec.maxScore   || 0,
+        mcqScore:   rec.mcqScore   || 0,
+        mcqMax:     rec.mcqMax     || 0,
+        autoScore:  rec.autoScore  || 0,
+        autoMax:    rec.autoMax    || 0,
+        pct:        rec.pct        || 0,
+        grade:      rec.grade      || '',
+        mcqRight:   rec.mcqRight   || 0,
+        mcqTotal:   rec.mcqTotal   || 0,
+        attempt:    rec.attempt    || 1,
+        time:       rec.time       || new Date().toLocaleString(),
+        source:     'take_exam'
+      };
+      cloudDB.ref('mtc_perf_records/' + fbRec.id).set(fbRec)
+        .then(function() { /* silent success */ })
+        .catch(function() { /* offline — local copy is the fallback */ });
+    }
+  } catch(e) { /* Firebase unavailable — local copy still saved */ }
+}
+
+// ── Performance Records — merged from local localStorage + Firebase ───────────
+// Local records: exams taken on THIS device (admin or student testing).
+// Firebase records: exams taken by students on THEIR devices (any phone/tablet).
+// Both sources are merged, deduped by record id, and sorted newest-first.
+
+var _perfFBRecords = [];      // cached Firebase records
+var _perfFBListener = false;  // true once Firebase listener is attached
+
+function teAttachPerfListener() {
+  if (_perfFBListener || !cloudDB) return;
+  _perfFBListener = true;
+  cloudDB.ref('mtc_perf_records').on('value', function(snap) {
+    var data = snap.val() || {};
+    _perfFBRecords = Object.values(data);
+    renderPerfRecords();
+  });
+}
+
+function teMergedRecords() {
+  var local = teGetRecords();
+  // Build id set from local records to dedupe against Firebase
+  var localIds = {};
+  for (var i = 0; i < local.length; i++) localIds[String(local[i].id)] = true;
+  var merged = local.slice();
+  for (var j = 0; j < _perfFBRecords.length; j++) {
+    if (!localIds[String(_perfFBRecords[j].id)]) merged.push(_perfFBRecords[j]);
+  }
+  return merged;
 }
 
 function renderPerfRecords() {
-  if (mtcCurrentRole === 'student') return; // Privacy: Performance Records are admin-only
-  var records    = teGetRecords();
+  if (mtcCurrentRole === 'student') return;
+
+  // Attach Firebase listener on first admin view
+  teAttachPerfListener();
+
+  var records    = teMergedRecords();
   var subjFilter = (document.getElementById('perf-subj-filter') || {}).value || '';
   var search     = ((document.getElementById('perf-search') || {}).value || '').toLowerCase();
 
@@ -5221,8 +6028,7 @@ function renderPerfRecords() {
   var sumEl = document.getElementById('perf-summary');
   if (sumEl) {
     var total = filtered.length;
-    var dist  = 0, merit = 0, credit = 0, pass = 0, fail = 0;
-    var scoreSum = 0;
+    var dist  = 0, merit = 0, credit = 0, pass = 0, fail = 0, scoreSum = 0;
     for (var i = 0; i < filtered.length; i++) {
       if (filtered[i].grade === 'DISTINCTION') dist++;
       else if (filtered[i].grade === 'MERIT')  merit++;
@@ -5238,21 +6044,21 @@ function renderPerfRecords() {
       '<span class="grade-pill grade-c">\u2728 Credit: ' + credit + '</span>' +
       '<span class="grade-pill grade-p">\u2705 Pass: ' + pass + '</span>' +
       '<span class="grade-pill grade-f">\u274C Fail: ' + fail + '</span>' +
-      '<span style="background:rgba(201,162,39,0.15);color:var(--gold);padding:4px 12px;border-radius:20px;font-size:0.78rem;font-weight:700;border:1px solid rgba(201,162,39,0.3);">Avg: ' + avg + '% | Total: ' + total + '</span>';
+      '<span style="background:rgba(201,162,39,0.15);color:var(--gold);padding:4px 12px;border-radius:20px;font-size:0.78rem;font-weight:700;border:1px solid rgba(201,162,39,0.3);">Avg: ' + avg + '% | Total: ' + total + '</span>' +
+      (cloudDB ? '<span style="font-size:0.76rem;color:#81c784;padding:4px 10px;">\uD83C\uDF10 Live — syncing from all student devices</span>' :
+                 '<span style="font-size:0.76rem;color:#ffb74d;padding:4px 10px;">&#9888; Not connected to cloud — showing this device only</span>');
   }
 
   var wrap = document.getElementById('perf-table-wrap');
   if (!wrap) return;
 
   if (filtered.length === 0) {
-    wrap.innerHTML = '<div style="text-align:center;color:#5566a0;padding:24px;font-size:0.88rem;">No records found' + (subjFilter || search ? ' for this filter.' : '. Take an exam to begin.') + '</div>';
+    wrap.innerHTML = '<div style="text-align:center;color:#5566a0;padding:24px;font-size:0.88rem;">No records found' + (subjFilter || search ? ' for this filter.' : '. Students will appear here automatically when they take exams on their devices.') + '</div>';
     return;
   }
 
-  // Table (newest first)
   var html = '<table style="width:100%;border-collapse:collapse;font-size:0.82rem;">';
-  html += '<thead>';
-  html += '<tr style="background:rgba(201,162,39,0.15);color:var(--gold);">';
+  html += '<thead><tr style="background:rgba(201,162,39,0.15);color:var(--gold);">';
   html += '<th style="padding:8px 10px;text-align:left;border-bottom:1px solid rgba(201,162,39,0.3);">#</th>';
   html += '<th style="padding:8px 10px;text-align:left;border-bottom:1px solid rgba(201,162,39,0.3);">Student</th>';
   html += '<th style="padding:8px 10px;text-align:left;border-bottom:1px solid rgba(201,162,39,0.3);">Exam</th>';
@@ -5264,13 +6070,14 @@ function renderPerfRecords() {
   html += '<th style="padding:8px 10px;text-align:center;border-bottom:1px solid rgba(201,162,39,0.3);">Del</th>';
   html += '</tr></thead><tbody>';
 
-  var sorted = filtered.slice().reverse(); // newest first
+  var sorted = filtered.slice().reverse();
   for (var ri = 0; ri < sorted.length; ri++) {
     var r   = sorted[ri];
     var gc  = teGradeColor(r.grade);
     var bg  = ri % 2 === 0 ? 'rgba(8,18,54,0.3)' : 'rgba(14,24,70,0.4)';
+    var isFB = r.source === 'take_exam' && _perfFBRecords.some(function(fr){ return String(fr.id)===String(r.id); });
     html += '<tr style="background:' + bg + ';">';
-    html += '<td style="padding:7px 10px;color:#8899cc;">' + (ri+1) + '</td>';
+    html += '<td style="padding:7px 10px;color:#8899cc;">' + (ri+1) + (isFB ? ' <span title="Synced from student device" style="color:#81c784;font-size:0.7rem;">\uD83C\uDF10</span>' : '') + '</td>';
     html += '<td style="padding:7px 10px;font-weight:600;">' + escHtml(r.student || '') + '<br><span style="color:#8899cc;font-weight:400;">' + escHtml(r.studentNum || '') + '</span></td>';
     html += '<td style="padding:7px 10px;max-width:180px;">' + escHtml(r.examTitle || '') + '</td>';
     html += '<td style="padding:7px 10px;color:#aab4d4;">' + escHtml(r.subject || '') + (r.grade_lvl ? '<br><span style="font-size:0.76rem;">' + escHtml(r.grade_lvl) + '</span>' : '') + '</td>';
@@ -5284,31 +6091,37 @@ function renderPerfRecords() {
   html += '</tbody></table>';
   wrap.innerHTML = html;
 
-  // Delete delegation
   wrap.onclick = function(ev) {
     var btn = ev.target;
     if (btn.tagName !== 'BUTTON') return;
     var del = btn.getAttribute('data-perf-del');
-    if (del) teDeleteRecord(parseInt(del));
+    if (del) teDeleteRecord(del);
   };
 }
 
 function teDeleteRecord(id) {
+  // Remove from local
   var records = teGetRecords();
   var updated = [];
   for (var i = 0; i < records.length; i++) {
-    if (records[i].id !== id) updated.push(records[i]);
+    if (String(records[i].id) !== String(id)) updated.push(records[i]);
   }
   try { localStorage.setItem(PERF_KEY, JSON.stringify(updated)); } catch(e) {}
+  // Remove from Firebase
+  try { if (cloudDB) cloudDB.ref('mtc_perf_records/' + id).remove(); } catch(e) {}
+  // Remove from local FB cache
+  _perfFBRecords = _perfFBRecords.filter(function(r){ return String(r.id) !== String(id); });
   renderPerfRecords();
   showToast('Record deleted');
 }
 
 function clearPerfRecords() {
-  var records = teGetRecords();
+  var records = teMergedRecords();
   if (records.length === 0) { showToast('No records to clear'); return; }
-  openModal('Clear Performance Records', '<p style="color:#d4e0ff;">Delete ALL ' + records.length + ' performance record(s)? This cannot be undone.</p>', function() {
+  openModal('Clear Performance Records', '<p style="color:#d4e0ff;">Delete ALL ' + records.length + ' performance record(s) from this device and the cloud? This cannot be undone.</p>', function() {
     try { localStorage.removeItem(PERF_KEY); } catch(e) {}
+    try { if (cloudDB) cloudDB.ref('mtc_perf_records').remove(); } catch(e) {}
+    _perfFBRecords = [];
     closeModal(); renderPerfRecords();
     showToast('All records cleared');
   }, 'Clear All');
@@ -6924,6 +7737,18 @@ function cloudLaunchStudentExam(examData, db, loadDiv) {
 
   function showExam() {
     document.body.innerHTML = '';
+
+    // Inject table styles — needed because the login gate injects a * {margin:0;padding:0}
+    // reset that collapses all table cell borders and padding. These rules override that.
+    var tblStyle = document.createElement('style');
+    tblStyle.textContent =
+      '.q-inserted-table,.q-tbl-dark{width:100%;border-collapse:collapse!important;margin:8px 0!important;font-size:.85rem;color:#d4e0ff;}' +
+      '.q-inserted-table th,.q-tbl-dark th{background:rgba(201,162,39,.12)!important;color:#c9a227!important;font-weight:700;border:1.5px solid rgba(201,162,39,.35)!important;padding:6px 10px!important;text-align:center!important;}' +
+      '.q-inserted-table td,.q-tbl-dark td{border:1.5px solid rgba(201,162,39,.25)!important;padding:6px 10px!important;text-align:center!important;vertical-align:middle!important;}' +
+      '.q-inserted-table tbody tr:nth-child(even),.q-tbl-dark tbody tr:nth-child(even){background:rgba(255,255,255,.04)!important;}' +
+      'table.q-inserted-table,table.q-tbl-dark{display:table!important;border-spacing:0!important;}';
+    document.head.appendChild(tblStyle);
+
     var d = document.createElement('div');
     d.id = 'online-exam-wrap';
 
@@ -6940,16 +7765,27 @@ function cloudLaunchStudentExam(examData, db, loadDiv) {
       qhtml += '<span style="background:rgba(201,162,39,.12);color:#c9a227;padding:2px 9px;border-radius:20px;font-size:.73rem;font-weight:700;border:1px solid rgba(201,162,39,.3);">'+tn+'</span>';
       qhtml += '<span style="font-size:.76rem;color:#8899cc;">'+q.marks+' mark'+(q.marks!==1?'s':'')+'</span></div>';
       qhtml += '<div style="font-size:.93rem;font-weight:600;line-height:1.55;margin-bottom:10px;">'+h(q.text||'')+'</div>';
+      if(q.tableHtml) qhtml += '<div style="overflow-x:auto;margin-bottom:8px;">'+q.tableHtml+'</div>';
       if(q.image) qhtml += '<img src="'+q.image+'" style="max-width:100%;max-height:300px;border-radius:8px;border:2px solid rgba(201,162,39,.3);display:block;margin:8px auto;">';
       if(q.type==='mcq'){
         var opts=q.options||[];
         for(var oi=0;oi<opts.length;oi++){
-          if(!opts[oi].text&&!opts[oi].image)continue;
+          if(!opts[oi].text&&!opts[oi].image&&!opts[oi].tableHtml)continue;
           qhtml+='<div id="onopt-'+q.id+'-'+oi+'" data-qid="'+q.id+'" data-oi="'+oi+'" style="display:flex;align-items:flex-start;gap:8px;padding:10px 12px;border:1px solid rgba(201,162,39,.18);border-radius:9px;margin-bottom:7px;cursor:pointer;transition:all .2s;background:rgba(8,18,54,.4);">';
           qhtml+='<div style="width:26px;height:26px;border-radius:5px;background:#c9a227;color:#0d1b4b;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:.84rem;">'+opts[oi].label+'</div>';
-          qhtml+='<div>'+h(opts[oi].text||'');
+          qhtml+='<div style="flex:1;">'+h(opts[oi].text||'');
           if(opts[oi].image)qhtml+='<br><img src="'+opts[oi].image+'" style="max-width:180px;max-height:140px;border-radius:5px;margin-top:5px;">';
+          if(opts[oi].tableHtml)qhtml+='<div style="overflow-x:auto;margin-top:4px;">'+opts[oi].tableHtml+'</div>';
           qhtml+='</div></div>';
+        }
+      } else if ((q.type==='short'||q.type==='essay') && q.subParts && q.subParts.length>0) {
+        var sps2=q.subParts;
+        for(var spi=0;spi<sps2.length;spi++){
+          var sp2=sps2[spi];
+          qhtml+='<div style="margin-bottom:12px;padding:8px 10px;border-left:3px solid rgba(201,162,39,0.4);border-radius:0 7px 7px 0;">';
+          qhtml+='<div style="font-size:.87rem;font-weight:600;margin-bottom:5px;"><span style="display:inline-block;min-width:20px;height:20px;line-height:20px;text-align:center;background:#c9a227;color:#0d1b4b;border-radius:3px;font-size:.76rem;margin-right:6px;">('+sp2.label+')</span>'+h(sp2.text||'')+' <span style="color:#8899cc;font-size:.75rem;font-weight:400;">('+((sp2.marks||1))+' mark'+((sp2.marks||1)!==1?'s':'')+')</span></div>';
+          qhtml+='<textarea id="onsa-'+q.id+'-'+sp2.label+'" rows="2" placeholder="Answer for ('+sp2.label+')..." style="width:100%;padding:8px 10px;background:rgba(8,18,54,.8);border:1px solid rgba(201,162,39,.3);border-radius:7px;color:#fff;font-size:.88rem;resize:vertical;font-family:inherit;outline:none;"></textarea>';
+          qhtml+='</div>';
         }
       } else {
         qhtml+='<textarea id="onsa-'+q.id+'" rows="'+(q.type==='essay'?7:3)+'" placeholder="Write your answer here..." style="width:100%;padding:10px;background:rgba(8,18,54,.8);border:1px solid rgba(201,162,39,.3);border-radius:8px;color:#fff;font-size:.9rem;resize:vertical;font-family:inherit;outline:none;"></textarea>';
@@ -7018,8 +7854,19 @@ function cloudLaunchStudentExam(examData, db, loadDiv) {
 
   function submitOnlineExam(){
     if(timerInt2)clearInterval(timerInt2);
-    // Save textarea answers
-    for(var qi=0;qi<qs.length;qi++){var q=qs[qi];if(q.type!=='mcq'){var ta=document.getElementById('onsa-'+q.id);if(ta)studentAnswers[q.id]=ta.value;}}
+    // Save textarea answers (including sub-parts)
+    for(var qi=0;qi<qs.length;qi++){
+      var q=qs[qi];
+      if(q.type!=='mcq'){
+        if(q.subParts&&q.subParts.length>0){
+          for(var spi2=0;spi2<q.subParts.length;spi2++){
+            var sp3=q.subParts[spi2];
+            var spta=document.getElementById('onsa-'+q.id+'-'+sp3.label);
+            if(spta)studentAnswers[q.id+'_'+sp3.label]=spta.value;
+          }
+        }else{var ta=document.getElementById('onsa-'+q.id);if(ta)studentAnswers[q.id]=ta.value;}
+      }
+    }
     var score=0,max=0,right=0,total=0;
     for(var i=0;i<qs.length;i++){var q=qs[i];if(q.type==='mcq'){total++;max+=(q.marks||1);if(studentAnswers[q.id]===q.correct){score+=(q.marks||1);right++;}}}
     var pct=max>0?Math.round((score/max)*100):0;
@@ -7250,6 +8097,12 @@ function cloudLaunchStudentExam(examData, db, loadDiv) {
     }
     function amMarkAnswer(studentAnswer, modelAnswer, maxMarks) {
       if (!studentAnswer || !studentAnswer.trim()) return { score:0, feedback:'No answer provided — 0 marks awarded.' };
+      // Direct simplified match — handles numeric answers like "2.4" == "2. 4"
+      function amSimplify(s) { return String(s||'').toLowerCase().replace(/\s+/g,'').replace(/,/g,'.').replace(/[^a-z0-9.\/=\-\+%]/g,''); }
+      var asSmp = amSimplify(studentAnswer), amSmp = amSimplify(modelAnswer);
+      if (asSmp && amSmp && (asSmp === amSmp || (asSmp.length >= 2 && amSmp.indexOf(asSmp) !== -1))) {
+        return { score: maxMarks, feedback: 'Excellent! Your answer matches the key. You matched all key concepts.' };
+      }
       var res = amMatch(studentAnswer, modelAnswer||'');
       var rawPct = res.totalConcepts>0?(res.matched/res.totalConcepts):0;
       var scorePct;
@@ -7274,13 +8127,30 @@ function cloudLaunchStudentExam(examData, db, loadDiv) {
     var oS=0, oM=0, oMk={}, oFb={};
     for (var oqi2=0; oqi2<longQsOnline.length; oqi2++) {
       var oq = longQsOnline[oqi2];
-      var oA = studentAnswers[oq.id] || '';
-      var modelAns = oq.answer || oq.guidance || '';
-      var markResult = amMarkAnswer(oA, modelAns, oq.marks || 1);
-      oMk[oq.id] = markResult.score;
-      oFb[oq.id] = markResult.feedback;
-      oS += markResult.score;
-      oM += (oq.marks || 1);
+      if (oq.subParts && oq.subParts.length > 0) {
+        // Mark each sub-part independently
+        oMk[oq.id] = {}; oFb[oq.id] = {};
+        var oqScore = 0, oqMax = 0;
+        for (var ospi=0; ospi<oq.subParts.length; ospi++) {
+          var osp = oq.subParts[ospi];
+          var ospAns = studentAnswers[oq.id+'_'+osp.label] || '';
+          var ospMks = osp.marks || 1;
+          var ospRes = amMarkAnswer(ospAns, osp.answer || '', ospMks);
+          oMk[oq.id][osp.label] = ospRes.score;
+          oFb[oq.id][osp.label] = ospRes.feedback;
+          oqScore += ospRes.score; oqMax += ospMks;
+        }
+        oMk[oq.id]._score = oqScore; oMk[oq.id]._max = oqMax;
+        oS += oqScore; oM += oqMax;
+      } else {
+        var oA = studentAnswers[oq.id] || '';
+        var modelAns = oq.answer || oq.guidance || '';
+        var markResult = amMarkAnswer(oA, modelAns, oq.marks || 1);
+        oMk[oq.id] = markResult.score;
+        oFb[oq.id] = markResult.feedback;
+        oS += markResult.score;
+        oM += (oq.marks || 1);
+      }
       var fp=document.getElementById('oaip'), fl=document.getElementById('oail');
       if (fp) fp.style.width = Math.round(((oqi2+1)/longQsOnline.length)*100)+'%';
       if (fl) fl.textContent = (oqi2+1)+' of '+longQsOnline.length+' marked';
